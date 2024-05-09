@@ -8,7 +8,7 @@ export class drugEntity {
   @Column({ length: 255, nullable: false })
   name: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: false })
   barcode: string;
 
   @Column({ length: 500, nullable: false })
