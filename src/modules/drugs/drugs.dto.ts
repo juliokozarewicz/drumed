@@ -19,7 +19,7 @@ export class createDTO {
 
     @ApiProperty({ 
         example: "Paracetamol, or acetaminophen, is a widely used medication for pain and fever. It's safe in recommended doses but risky for liver issues and alcohol history. Misuse can cause severe damage. It's crucial to follow dosing guidelines and avoid combining with other paracetamol medications to prevent overdose.", 
-        maxLength: 500
+        maxLength: 1000
     })
     @IsNotEmpty()
     description: string;
