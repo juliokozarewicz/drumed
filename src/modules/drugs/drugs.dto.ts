@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, MaxLength, IsOptional } from 'class-validator';
 
 export class createDTO {
-
+ 
     @ApiProperty({ 
         example: 'paracetamol', 
         maxLength: 255

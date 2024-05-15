@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, BadGatewayException, ValidationPipe, Put, Delete } from '@nestjs/common';
 import { drugServices } from './drugs.service';
 import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
-import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('api')
 export class drugController {
@@ -31,4 +31,5 @@ export class drugController {
     deleteDrug(@Body(new ValidationPipe({ transform: true })) body: deleteDTO) {
         return this.drugServices.deleteDrug(body);
     }
+
 }

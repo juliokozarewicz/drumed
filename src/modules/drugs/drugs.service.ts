@@ -69,8 +69,8 @@ export class drugServices {
     const drugUpdate = await this.drugEntity.findOne({ where: { id } });
 
     if (!drugUpdate) {
-    throw new NotFoundException(`not found`);
-  }
+      throw new NotFoundException(`not found`);
+    }
 
     drugUpdate.id = id;
     drugUpdate.name = name;
@@ -105,5 +105,5 @@ export class drugServices {
 
     return await this.drugEntity.delete(id);
 
-}
+  }
 }
