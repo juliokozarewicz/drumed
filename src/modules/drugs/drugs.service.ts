@@ -65,7 +65,7 @@ export class drugServices {
     const batch = body['batch'];
     const restricted = body['restricted'];
 
-    // update in DB
+    // search in DB
     const drugUpdate = await this.drugEntity.findOne({ where: { id } });
 
     if (!drugUpdate) {
@@ -93,10 +93,10 @@ export class drugServices {
     const id = body['id']
 
     if (!id) {
-        throw new BadRequestException("id is required")
+      throw new BadRequestException("id is required")
     }
 
-    // update in DB
+    // search in DB
     const drugDelete = await this.drugEntity.findOne({ where: { id } });
 
     if (!drugDelete) {
@@ -104,6 +104,6 @@ export class drugServices {
     }
 
     return await this.drugEntity.delete(id);
-
+ 
   }
 }
