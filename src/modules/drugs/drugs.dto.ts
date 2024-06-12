@@ -52,7 +52,6 @@ export class createDTO {
         example: '15.55', 
         maxLength: 255
     })
-    @Length(1, 255)
     @IsNotEmpty()
     purchasePrice: number;
 
@@ -60,7 +59,6 @@ export class createDTO {
         example: '25.78', 
         maxLength: 255
     })
-    @Length(1, 255)
     @IsNotEmpty()
     sellingPrice: number;
 
@@ -159,7 +157,6 @@ export class createDTO {
         example: '15.55', 
         maxLength: 255
     })
-    @Length(1, 255)
     @IsNotEmpty()
     purchasePrice: number;
 
@@ -167,7 +164,6 @@ export class createDTO {
         example: '25.78', 
         maxLength: 255
     })
-    @Length(1, 255)
     @IsNotEmpty()
     sellingPrice: number;
 
