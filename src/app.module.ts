@@ -4,11 +4,14 @@ import { AppService } from './app.service';
 import { drugModule } from './modules/drugs/drugs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-
+import { AccountsModule } from './modules/Accounts/accounts.module';
 
 @Module({
   imports: [
+
     drugModule,
+    AccountsModule,
+  
     ConfigModule.forRoot(),
 
     TypeOrmModule.forRoot({
@@ -21,6 +24,7 @@ import { ConfigModule } from '@nestjs/config';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     })
+
   ],
   controllers: [AppController],
   providers: [AppService],
