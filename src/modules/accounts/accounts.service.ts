@@ -13,7 +13,7 @@ export class UserService {
         private readonly userRepository: Repository<UserEntity>,
     ) {}
 
-    async createUser(userDto: UserEntityDTO): Promise<UserEntity> {
+    async createUser(userDto: UserEntityDTO): Promise<any> {
 
         // existing email verification
         const existingUser = await this.userRepository.findOne({ where: { email: userDto.email } });
@@ -31,7 +31,7 @@ export class UserService {
 
         try {
             const savedUser = await this.userRepository.save(newUser);
-            return savedUser;
+            return {'message': 'User created successfully', 'statusCode': 201};
         } catch (error) {
             throw new ConflictException('an error occurred.');
         }
