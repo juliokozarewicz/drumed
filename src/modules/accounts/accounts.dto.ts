@@ -4,16 +4,10 @@ import { IsNotEmpty, IsBoolean, IsInt, IsString, IsEmail, Length, IsOptional, Ma
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserEntityDTO {
-    @ApiProperty({ 
-        example: 'true', 
-    })
+
     @IsBoolean()
     isActive: boolean;
 
-    @ApiProperty({
-        description: 'User level. Can be 0 for regular users and 1 for administrator.',
-        example: '0',
-    })
     @IsBoolean()
     level: boolean;
 
@@ -23,10 +17,6 @@ export class UserEntityDTO {
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
 
-    @ApiProperty({
-        description: 'Set to "true" for activated.',
-        example: '0',
-    })
     @IsNotEmpty()
     @IsBoolean()
     isEmailConfirmed: boolean;
