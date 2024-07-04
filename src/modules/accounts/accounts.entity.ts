@@ -6,9 +6,6 @@ export class Profile {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ type: 'varchar', length: 255, nullable: true })
-    name: string;
-
     @Column({ type: 'varchar', length: 500, nullable: true })
     biography: string;
 
@@ -36,6 +33,9 @@ export class UserEntity {
 
     @Column({ type: 'boolean', default: false })
     level: boolean;
+
+    @Column({ type: 'varchar', length: 255 })
+    name: string;
 
     @Column({ type: 'varchar', length: 255 })
     email: string;

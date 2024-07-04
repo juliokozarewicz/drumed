@@ -12,6 +12,13 @@ export class UserEntityDTO {
     level: boolean;
 
     @ApiProperty({ 
+        example: 'Robert Folk', 
+    })
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+
+    @ApiProperty({ 
         example: 'robertfolk@gmail.com', 
     })
     @IsEmail({}, { message: 'Please enter a valid email address' })
@@ -42,13 +49,6 @@ export class UserEntityDTO {
 }
 
 export class ProfileDTO {
-    @ApiProperty({ 
-        example: 'Robert Folk', 
-    })
-    @IsOptional()
-    @IsString()
-    @Length(1, 255)
-    name: string;
 
     @ApiProperty({ 
         example: "I'm Robert Folk, a pharmacist with a deep love for music and science. Exploring the intricate rhythms of life while delving into the complexities of medicine fuels my passion for both art and discovery.", 
