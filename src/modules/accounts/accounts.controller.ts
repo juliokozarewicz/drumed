@@ -5,11 +5,11 @@ import { UserService } from './accounts.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
 
+@ApiTags('ACCOUNTS')
 @Controller('accounts')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @ApiTags('ACCOUNTS')
     @ApiQuery({ type: UserEntityDTO})
     @Post('signup')
     async createUser(@Body(new ValidationPipe({ transform: true })) createUserDto: UserEntityDTO): Promise<UserEntity> {
