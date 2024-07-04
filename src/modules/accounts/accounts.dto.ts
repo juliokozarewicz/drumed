@@ -39,6 +39,7 @@ export class UserEntityDTO {
     @Matches(/^(?=.*[a-z])/, { message: 'Password must contain at least one lowercase letter' })
     @Matches(/^(?=.*\d)/, { message: 'Password must contain at least one number' })
     @Matches(/^(?=.*[!@#$%^&*])/, { message: 'Password must contain at least one special character (e.g., !@#$%^&*)' })
+    @Length(6, 255, { message: 'Password must be between 6 and 255 characters' })
     password: string;
 
     constructor(partial: Partial<UserEntityDTO>) {
