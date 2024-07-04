@@ -2,7 +2,6 @@ import { BadRequestException } from '@nestjs/common';
 import * as sanitizeHtml from 'sanitize-html';
 
 
-
 export function sanitizeNameString(input: string): string {
 
     if (/[^a-zA-Z0-9\s]/.test(input)) {
