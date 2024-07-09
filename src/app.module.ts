@@ -5,12 +5,14 @@ import { drugModule } from './modules/drugs/drugs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AccountsModule } from './modules/accounts/accounts.module';
+import { EmailModule } from './modules/email/email.module';
 
 @Module({
   imports: [
 
     drugModule,
     AccountsModule,
+    EmailModule,
   
     ConfigModule.forRoot(),
 
