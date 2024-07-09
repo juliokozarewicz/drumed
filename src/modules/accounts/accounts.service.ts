@@ -42,7 +42,6 @@ export class UserService {
                 // create new profile
                 const newProfile = new Profile();
                 newProfile.id = savedUser.id;
-                newProfile.biography = '0';
                 await transactionalEntityManager.save(newProfile);
 
             });
