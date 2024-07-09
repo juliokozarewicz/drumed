@@ -46,7 +46,8 @@ export class UserEntity {
     @Column({ type: 'varchar', length: 255 })
     password: string;
 
-    @OneToOne(() => Profile, { eager: true })
-    @JoinColumn()
+    @OneToOne(() => Profile, { eager: true, cascade: true })
+    @JoinColumn({ name: 'profile_id', referencedColumnName: 'id' })
     profile: Profile;
+
 }
