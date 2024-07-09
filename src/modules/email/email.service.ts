@@ -20,4 +20,14 @@ export class EmailService {
       throw error;
     }
   }
+
+  async enviarEmailTeste() {
+    try {
+      await this.enviarEmail('julioerk@outlook.com', 'Assunto teste', 'Corpo teste2');
+      console.log('E-mail de teste enviado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao enviar e-mail de teste:', error);
+      throw error;
+    }
+  }
 }
