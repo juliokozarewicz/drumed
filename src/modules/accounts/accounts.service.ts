@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProfileDTO, UserEntityDTO } from './accounts.dto';
+import { UserEntityDTO } from './accounts.dto';
 import { Profile, UserEntity } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
@@ -12,9 +12,6 @@ export class UserService {
     constructor(
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
-
-        @InjectRepository(Profile)
-        private readonly profileRepository: Repository<Profile>,
     ) {}
 
     // insert new user
@@ -37,13 +34,18 @@ export class UserService {
 
         try {
 
-            // commit db user data
-            const saveduser = await this.userRepository.save(newUser);
+            await this.userRepository.manager.transaction(async transactionalEntityManager => {
 
-            // create user profile data
-            const newProfile = new Profile();
-            newProfile.id = saveduser.id;
-            await this.profileRepository.save(newProfile);
+                // save user
+                const savedUser = await transactionalEntityManager.save(newUser);
+
+                // create new profile
+                const newProfile = new Profile();
+                newProfile.id = savedUser.id;
+                newProfile.biography = '0';
+                await transactionalEntityManager.save(newProfile);
+
+            });
 
             return {'message': 'User created successfully', 'statusCode': 201};
         } catch (error) {
