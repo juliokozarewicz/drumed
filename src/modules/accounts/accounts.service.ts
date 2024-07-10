@@ -53,7 +53,7 @@ export class UserService {
             
             // send email code for acc activate
             // -----------------------------------------------------------
-            const to = 'panificadora.aladim@hotmail.com';
+            const to = 'email@hotmail.com';
             const subject = 'Assuntooooo';
             const text = 'Mensagemmmmmmmm!';
 

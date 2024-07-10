@@ -24,7 +24,6 @@ export class EmailService {
 
   async sendTextEmail(to: string, subject: string, text: string): Promise<void> {
     await this.transporter.sendMail({
-      from: 'panificadora.aladim@hotmail.com',
       to,
       subject,
       text,
