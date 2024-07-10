@@ -1,33 +1,37 @@
-// email.service.ts
+import nodemailer from 'nodemailer'
 
-import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
+interface ISendMail {
+    to: string
+    subject: string
+    message: string
+}
+export class MailService {
 
-@Injectable()
-export class EmailService {
-  constructor(private readonly mailerService: MailerService) {}
-
-  async enviarEmail(destinatario: string, assunto: string, corpo: string) {
-    try {
-      await this.mailerService.sendMail({
-        to: destinatario,
-        subject: assunto,
-        text: corpo,
+  // logic for sending emails will go here
+  async send({ to, subject, message, }: ISendMail) {
+      var transporter = nodemailer.createTransport({
+         host: process.env.EMAIL_HOST,
+         port: process.env.EMAIL_PORT,
+         auth: {
+            user: process.env.EMAIL_FROM,
+            pass: process.env.EMAIL_PASS,
+         }
       });
-      console.log('E-mail enviado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao enviar e-mail:', error);
-      throw error;
-    }
-  }
 
-  async enviarEmailTeste() {
-    try {
-      await this.enviarEmail('julioerk@outlook.com', 'Assunto teste', 'Corpo teste2');
-      console.log('E-mail de teste enviado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao enviar e-mail de teste:', error);
-      throw error;
-    }
-  }
+      var mailOptions = {
+        from: process.env.EMAIL_HOST,
+        to,
+        subject,
+        html: message,
+      };
+
+      try {
+          await transporter.sendMail(mailOptions)
+          return true
+      } catch(error) {
+
+          console.error("error sending email ", error)
+          return false
+      }
+  } 
 }
