@@ -5,6 +5,7 @@ import { UserEntityDTO } from './accounts.dto';
 import { Profile, UserEntity } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
+import { EmailService } from '../email/email.service';
 
 
 @Injectable()
@@ -12,6 +13,7 @@ export class UserService {
     constructor(
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
+        private readonly emailService: EmailService,
     ) {}
 
     // insert new user
@@ -45,6 +47,18 @@ export class UserService {
                 await transactionalEntityManager.save(newProfile);
 
             });
+
+            
+            
+            
+            // send email code for acc activate
+            // -----------------------------------------------------------
+            const to = 'panificadora.aladim@hotmail.com';
+            const subject = 'Assuntooooo';
+            const text = 'Mensagemmmmmmmm!';
+
+            await this.emailService.sendTextEmail(to, subject, text);
+            // -----------------------------------------------------------
 
             return {'message': 'User created successfully', 'statusCode': 201};
         } catch (error) {
