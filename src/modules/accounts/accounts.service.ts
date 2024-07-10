@@ -62,7 +62,7 @@ export class UserService {
 
             return {'message': 'User created successfully', 'statusCode': 201};
         } catch (error) {
-            throw new BadRequestException(`an error occurred: ${error}`);
+            throw new BadRequestException(`an error occurred`);
         }
     }
 
