@@ -48,14 +48,12 @@ export class UserService {
 
             });
 
-            
-            
-            
             // send email code for acc activate
             // -----------------------------------------------------------
-            const to = 'email@hotmail.com';
-            const subject = 'Assuntooooo';
-            const text = 'Mensagemmmmmmmm!';
+            const codeAccount = 123456;
+            const to = newUser.email;
+            const subject = `${process.env.API_NAME} - Account activation`;
+            const text = `Your account activation code is:\n${codeAccount}`;
 
             await this.emailService.sendTextEmail(to, subject, text);
             // -----------------------------------------------------------
