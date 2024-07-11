@@ -1,8 +1,8 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntityDTO } from './accounts.dto';
-import { Profile, UserEntity } from './accounts.entity';
+import { CodeAccountActivateDTO, UserEntityDTO } from './accounts.dto';
+import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
 import { EmailService } from '../email/email.service';
@@ -13,6 +13,9 @@ export class UserService {
     constructor(
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
+
+        @InjectRepository(CodeAccountActivate)
+        private readonly userAccCodeActivate: Repository<CodeAccountActivate>,
         private readonly emailService: EmailService,
     ) {}
 
@@ -33,24 +36,29 @@ export class UserService {
         newUser.email = sanitizeEmail(userDto.email);
         newUser.isEmailConfirmed = userDto.isEmailConfirmed;
         newUser.password = await this.hashPassword(userDto.password);
+        const codeAccount = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
 
         try {
 
             await this.userRepository.manager.transaction(async transactionalEntityManager => {
 
-                // save user
+                // commit user
                 const savedUser = await transactionalEntityManager.save(newUser);
 
-                // create new profile
+                // commit new profile
                 const newProfile = new Profile();
                 newProfile.id = savedUser.id;
                 await transactionalEntityManager.save(newProfile);
 
+                // commit code
+                const codeAccActivate = new CodeAccountActivate();
+                codeAccActivate.id = savedUser.id;
+                codeAccActivate.code = codeAccount;
+                await transactionalEntityManager.save(codeAccActivate);
             });
 
             // send email code for acc activate
             // -----------------------------------------------------------
-            const codeAccount = 123456;
             const to = newUser.email;
             const subject = `${process.env.API_NAME} - Account activation`;
             const text = `Your account activation code is:\n${codeAccount}`;
@@ -61,6 +69,22 @@ export class UserService {
             return {'message': 'User created successfully', 'statusCode': 201};
         } catch (error) {
             throw new BadRequestException(`an error occurred`);
+        }
+    }
+
+    // insert new user
+    async activateAccount(accActivateDTO: CodeAccountActivateDTO): Promise<any> {
+        try {
+            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { id: accActivateDTO.id, code: accActivateDTO.code}});
+
+            if (CodeAccActivate) {
+                return {"message": "account activated successfully"};
+            } else {
+                throw new BadRequestException();
+            }
+
+        } catch (error) {
+            throw new BadRequestException(`error with activation code`);
         }
     }
 

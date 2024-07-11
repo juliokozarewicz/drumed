@@ -46,3 +46,15 @@ export class UserEntity {
     @Column({ type: 'varchar', length: 255 })
     password: string;
 }
+
+@Entity()
+export class CodeAccountActivate {
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
+
+    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    createdAt: Date;
+
+    @Column({ type: 'int' })
+    code: number;
+}

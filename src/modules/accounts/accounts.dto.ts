@@ -1,6 +1,6 @@
 // user.dto.ts
 
-import { IsNotEmpty, IsBoolean, IsInt, IsString, IsEmail, Length, IsOptional, Matches } from 'class-validator';
+import { IsNotEmpty, IsBoolean, IsInt, IsString, IsEmail, Length, IsOptional, Matches, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 
@@ -75,4 +75,20 @@ export class ProfileDTO {
     @IsString()
     @Length(1, 25)
     cpf: string;
+}
+
+export class CodeAccountActivateDTO {
+    @ApiProperty({ 
+        example: "110ec58a-a0f2-4ac4-8393-c866d813b8d1", 
+    })
+    @IsNotEmpty()
+    @IsString()
+    id: string;
+
+    @ApiProperty({ 
+        example: "123456", 
+    })
+    @IsNotEmpty()
+    @IsNumber()
+    code: number;
 }
