@@ -78,12 +78,12 @@ export class ProfileDTO {
 }
 
 export class CodeAccountActivateDTO {
+
     @ApiProperty({ 
-        example: "110ec58a-a0f2-4ac4-8393-c866d813b8d1", 
+        example: 'robertfolk@gmail.com', 
     })
-    @IsNotEmpty()
-    @IsString()
-    id: string;
+    @IsEmail({}, { message: 'Please enter a valid email address' })
+    email: string;
 
     @ApiProperty({ 
         example: "123456", 

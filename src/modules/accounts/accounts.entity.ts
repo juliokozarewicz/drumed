@@ -55,6 +55,9 @@ export class CodeAccountActivate {
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 
+    @Column({ type: 'varchar', length: 255 })
+    email: string;
+
     @Column({ type: 'int' })
     code: number;
 }

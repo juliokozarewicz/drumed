@@ -50,10 +50,11 @@ export class UserService {
                 newProfile.id = savedUser.id;
                 await transactionalEntityManager.save(newProfile);
 
-                // commit code
+                // commit code activate
                 const codeAccActivate = new CodeAccountActivate();
                 codeAccActivate.id = savedUser.id;
                 codeAccActivate.code = codeAccount;
+                codeAccActivate.email = savedUser.email;
                 await transactionalEntityManager.save(codeAccActivate);
             });
 
@@ -75,10 +76,21 @@ export class UserService {
     // insert new user
     async activateAccount(accActivateDTO: CodeAccountActivateDTO): Promise<any> {
         try {
-            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { id: accActivateDTO.id, code: accActivateDTO.code}});
+            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: accActivateDTO.email, code: accActivateDTO.code}});
 
             if (CodeAccActivate) {
-                return {"message": "account activated successfully"};
+
+                // delete all codes
+                const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: accActivateDTO.email } } );
+
+                // ##### Active account
+                // here
+                
+                for (let i = 0; i < deleteAllCodes.length; i++) {
+                    await this.userAccCodeActivate.remove(deleteAllCodes[i]);
+                }
+
+                return {"message": `account activated successfully`};
             } else {
                 throw new BadRequestException();
             }
