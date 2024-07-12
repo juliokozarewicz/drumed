@@ -73,8 +73,8 @@ export class UserService {
         }
     }
 
-    // insert new user
-    async activateAccount(accActivateDTO: CodeAccountActivateDTO): Promise<any> {
+    // Verify email
+    async verifyEmailCode(accActivateDTO: CodeAccountActivateDTO): Promise<any> {
         try {
             const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: accActivateDTO.email, code: accActivateDTO.code}});
 

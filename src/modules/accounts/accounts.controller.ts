@@ -19,9 +19,9 @@ export class UserController {
     }
 
     @ApiQuery({ type: CodeAccountActivateDTO})
-    @Post('validate-account')
-    async activateAccount(@Body(new ValidationPipe({ transform: true })) validateAccDTO: CodeAccountActivateDTO): Promise<any> {
-        return await this.userService.activateAccount(validateAccDTO);
+    @Post('verify-email')
+    async verifyEmailCode(@Body(new ValidationPipe({ transform: true })) validateAccDTO: CodeAccountActivateDTO): Promise<any> {
+        return await this.userService.verifyEmailCode(validateAccDTO);
     }
 
 }
