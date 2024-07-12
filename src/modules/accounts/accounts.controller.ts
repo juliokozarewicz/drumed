@@ -1,4 +1,4 @@
-import { Controller, Post, Body, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, Get, Param } from '@nestjs/common';
 import { CodeAccountActivateDTO, UserEntityDTO } from './accounts.dto';
 import { UserEntity } from './accounts.entity';
 import { UserService } from './accounts.service';
@@ -18,10 +18,9 @@ export class UserController {
         return await this.userService.createUser(createUserDto);
     }
 
-    @ApiQuery({ type: CodeAccountActivateDTO})
-    @Post('verify-email')
-    async verifyEmailCode(@Body(new ValidationPipe({ transform: true })) validateAccDTO: CodeAccountActivateDTO): Promise<any> {
-        return await this.userService.verifyEmailCode(validateAccDTO);
+    @Get('verify-email/:email/:code')
+    async verifyEmailCode(@Param() activateDTO: CodeAccountActivateDTO): Promise<any> {
+        return await this.userService.verifyEmailCode(activateDTO);
     }
 
 }
