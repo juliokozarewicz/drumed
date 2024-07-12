@@ -83,12 +83,14 @@ export class UserService {
                 // delete all codes
                 const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: accActivateDTO.email } } );
 
-                // ##### Active account
-                // here
-                
                 for (let i = 0; i < deleteAllCodes.length; i++) {
                     await this.userAccCodeActivate.remove(deleteAllCodes[i]);
                 }
+
+                // Active account
+                const activeAccEnd = await this.userRepository.findOne( { where: { email: accActivateDTO.email} } );
+                activeAccEnd.isEmailConfirmed = true;
+                await this.userRepository.save(activeAccEnd);
 
                 return {"message": `account activated successfully`};
             } else {
