@@ -62,7 +62,7 @@ export class UserService {
             // send email code for acc activate
             // -----------------------------------------------------------
             const protocol = window.location.protocol;
-            const activationLink = `${protocol}://${process.env.DOMAIN_NAME}:3000/accounts/verify-email/email=${encodeURIComponent(newUser.email)}&code=${encodeURIComponent(codeAccount)}`
+            const activationLink = `${encodeURIComponent(protocol)}://${process.env.DOMAIN_NAME}/accounts/verify-email/email=${encodeURIComponent(newUser.email)}&code=${encodeURIComponent(codeAccount)}`
             const to = newUser.email;
             const subject = `${process.env.API_NAME} - Account activation`;
             const text = `Click the link in this email to activate your account:\n\n\n${activationLink}`;
