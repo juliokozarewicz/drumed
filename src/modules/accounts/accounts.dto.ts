@@ -86,9 +86,10 @@ export class CodeAccountActivateDTO {
     email: string;
 
     @ApiProperty({ 
-        example: "123456", 
+        example: "SHA256 Hash",
     })
     @IsNotEmpty()
-    @IsNumber()
-    code: number;
+    @IsString()
+    @Length(1, 515)
+    code: string;
 }

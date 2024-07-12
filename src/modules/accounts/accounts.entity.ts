@@ -58,6 +58,6 @@ export class CodeAccountActivate {
     @Column({ type: 'varchar', length: 255 })
     email: string;
 
-    @Column({ type: 'int' })
-    code: number;
+    @Column({ type: 'varchar', length: 515 })
+    code: string;
 }

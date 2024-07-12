@@ -6,6 +6,7 @@ import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
 import { EmailService } from '../email/email.service';
+import * as crypto from 'crypto';
 
 
 @Injectable()
@@ -36,7 +37,7 @@ export class UserService {
         newUser.email = sanitizeEmail(userDto.email);
         newUser.isEmailConfirmed = userDto.isEmailConfirmed;
         newUser.password = await this.hashPassword(userDto.password);
-        const codeAccount = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+        const codeAccount = crypto.createHash('sha256').update(newUser.email).digest('hex');
 
         try {
 
@@ -60,9 +61,11 @@ export class UserService {
 
             // send email code for acc activate
             // -----------------------------------------------------------
+            const activationLink = `http://127.0.0.1:3000/accounts/verify-email?email=${encodeURIComponent(newUser.email)}&code=${encodeURIComponent(codeAccount)}`;            
+            
             const to = newUser.email;
             const subject = `${process.env.API_NAME} - Account activation`;
-            const text = `Your account activation code is:\n${codeAccount}`;
+            const text = `Click the link in this email to activate your account:\n\n\n${activationLink}`;
 
             await this.emailService.sendTextEmail(to, subject, text);
             // -----------------------------------------------------------
