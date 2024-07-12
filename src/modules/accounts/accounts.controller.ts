@@ -18,7 +18,7 @@ export class UserController {
         return await this.userService.createUser(createUserDto);
     }
 
-    @Get('verify-email/:email/:code')
+    @Get('verify-email/email=:email&code=:code')
     async verifyEmailCode(@Param() activateDTO: CodeAccountActivateDTO): Promise<any> {
         return await this.userService.verifyEmailCode(activateDTO);
     }
