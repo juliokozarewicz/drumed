@@ -88,8 +88,8 @@ export class UserService {
                 message: `an error occurred`,
                 _links: {
                     self: { href: "/accounts/signup" },
-                    next: { href: "/accounts/signup"},
-                    prev: { href: "/accounts/signup"}
+                    next: { href: "/accounts/signup" },
+                    prev: { href: "/accounts/signup" }
                 }
             });
         }
@@ -118,7 +118,7 @@ export class UserService {
                     statusCode: 201,
                     message: "account activated successfully",
                     _links: {
-                        self: { href: `/accounts/verify-email/email=${encodeURIComponent(accActivateDTO.email)}&code=${encodeURIComponent(accActivateDTO.code)}`},
+                        self: { href: `/accounts/verify-email/email=${encodeURIComponent(accActivateDTO.email)}&code=${encodeURIComponent(accActivateDTO.code)}` },
                         next: { href: "/" },
                         prev: { href: "/accounts/signup" }
                     }
@@ -132,9 +132,9 @@ export class UserService {
                 statusCode: 400,
                 message: `error with activation code`,
                 _links: {
-                    self: { href: "/accounts/signup" },
-                    next: { href: "/accounts/resend-verify-email"},
-                    prev: { href: "/accounts/signup"}
+                    self: { href: "/accounts/verify-email" },
+                    next: { href: "/accounts/resend-verify-email" },
+                    prev: { href: "/accounts/signup" }
                 }
             });
         }
