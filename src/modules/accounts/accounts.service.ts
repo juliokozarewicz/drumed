@@ -57,22 +57,41 @@ export class UserService {
                 codeAccActivate.code = codeAccount;
                 codeAccActivate.email = savedUser.email;
                 await transactionalEntityManager.save(codeAccActivate);
+
+                // send email code for acc activate
+                // -----------------------------------------------------------
+                const activationLink = (
+                    `http://${process.env.DOMAIN_NAME}/accounts/verify-email/` +
+                    `email=${encodeURIComponent(newUser.email)}` +
+                    `&code=${encodeURIComponent(codeAccount)}`
+                )
+                const to = newUser.email;
+                const subject = `${process.env.API_NAME} - Account activation`;
+                const text = `Click the link in this email to activate your account:\n\n\n${activationLink}`;
+
+                await this.emailService.sendTextEmail(to, subject, text);
+                // -----------------------------------------------------------
             });
 
-            // send email code for acc activate
-            // -----------------------------------------------------------
-            const protocol = window.location.protocol;
-            const activationLink = `${encodeURIComponent(protocol)}://${process.env.DOMAIN_NAME}/accounts/verify-email/email=${encodeURIComponent(newUser.email)}&code=${encodeURIComponent(codeAccount)}`
-            const to = newUser.email;
-            const subject = `${process.env.API_NAME} - Account activation`;
-            const text = `Click the link in this email to activate your account:\n\n\n${activationLink}`;
-
-            await this.emailService.sendTextEmail(to, subject, text);
-            // -----------------------------------------------------------
-
-            return {'message': 'User created successfully', 'statusCode': 201};
+            return {
+                statusCode: 201,
+                message: "User created successfully",
+                _links: {
+                    self: { href: "/accounts/signup" },
+                    next: { href: `/accounts/verify-email/email=${encodeURIComponent(newUser.email)}&code=${encodeURIComponent(codeAccount)}`},
+                    prev: { href: "/" }
+                }
+            };
         } catch (error) {
-            throw new BadRequestException(`an error occurred`);
+            throw new BadRequestException({
+                statusCode: 400,
+                message: `an error occurred`,
+                _links: {
+                    self: { href: "/accounts/signup" },
+                    next: { href: "/accounts/signup"},
+                    prev: { href: "/accounts/signup"}
+                }
+            });
         }
     }
 
@@ -95,13 +114,29 @@ export class UserService {
                 activeAccEnd.isEmailConfirmed = true;
                 await this.userRepository.save(activeAccEnd);
 
-                return {"message": `account activated successfully`};
+                return {
+                    statusCode: 201,
+                    message: "account activated successfully",
+                    _links: {
+                        self: { href: `/accounts/verify-email/email=${encodeURIComponent(accActivateDTO.email)}&code=${encodeURIComponent(accActivateDTO.code)}`},
+                        next: { href: "/" },
+                        prev: { href: "/accounts/signup" }
+                    }
+                };
             } else {
                 throw new BadRequestException();
             }
 
         } catch (error) {
-            throw new BadRequestException(`error with activation code`);
+            throw new BadRequestException({
+                statusCode: 400,
+                message: `error with activation code`,
+                _links: {
+                    self: { href: "/accounts/signup" },
+                    next: { href: "/accounts/resend-verify-email"},
+                    prev: { href: "/accounts/signup"}
+                }
+            });
         }
     }
 
