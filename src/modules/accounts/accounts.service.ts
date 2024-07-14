@@ -78,7 +78,7 @@ export class UserService {
                 message: "User created successfully",
                 _links: {
                     self: { href: "/accounts/signup" },
-                    next: { href: `/accounts/verify-email/email=${encodeURIComponent(newUser.email)}&code=${encodeURIComponent(codeAccount)}`},
+                    next: { href: `/accounts/verify-email/email=user-email&code=user-code`},
                     prev: { href: "/" }
                 }
             };
@@ -118,7 +118,7 @@ export class UserService {
                     statusCode: 201,
                     message: "account activated successfully",
                     _links: {
-                        self: { href: `/accounts/verify-email/email=${encodeURIComponent(accActivateDTO.email)}&code=${encodeURIComponent(accActivateDTO.code)}` },
+                        self: { href: `/accounts/verify-email/email=user-email&code=user-code` },
                         next: { href: "/" },
                         prev: { href: "/accounts/signup" }
                     }
