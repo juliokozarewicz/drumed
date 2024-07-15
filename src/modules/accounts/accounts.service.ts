@@ -30,9 +30,9 @@ export class UserService {
                 statusCode: 409,
                 message: `email already registered`,
                 _links: {
-                    self: { href: "/accounts/login" },
+                    self: { href: "/accounts/signup" },
                     next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
+                    prev: { href: "/" }
                 }
             });
         }
@@ -73,7 +73,7 @@ export class UserService {
                 message: "user created successfully",
                 _links: {
                     self: { href: "/accounts/signup" },
-                    next: { href: `/accounts/verify-email/email=user-email/code=user-code`},
+                    next: { href: `/accounts/login`},
                     prev: { href: "/accounts/login" }
                 }
             };
@@ -102,9 +102,9 @@ export class UserService {
                     statusCode: 409,
                     message: `email not registered`,
                     _links: {
-                        self: { href: "/accounts/signup" },
+                        self: { href: "/accounts/resend-verify-email" },
                         next: { href: "/accounts/signup" },
-                        prev: { href: "/accounts/signup" }
+                        prev: { href: "/accounts/login" }
                     }
                 });
             }
@@ -115,9 +115,9 @@ export class UserService {
                     statusCode: 409,
                     message: `account with email activated`,
                     _links: {
-                        self: { href: "/accounts/login" },
+                        self: { href: "/accounts/resend-verify-email" },
                         next: { href: "/accounts/login" },
-                        prev: { href: "/accounts/login" }
+                        prev: { href: "/" }
                     }
                 });
             }
@@ -142,8 +142,8 @@ export class UserService {
                 statusCode: 201,
                 message: "code resent successfully",
                 _links: {
-                    self: { href: "/accounts/signup" },
-                    next: { href: `/accounts/verify-email/email=user-email/code=user-code`},
+                    self: { href: "/accounts/resend-verify-email" },
+                    next: { href: `/accounts/login`},
                     prev: { href: "/" }
                 }
             };
@@ -153,8 +153,8 @@ export class UserService {
                 statusCode: 400,
                 message: `email activation code resend (${error})`,
                 _links: {
-                    self: { href: "/accounts/resend-verify-email/email={email}" },
-                    next: { href: "/accounts/resend-verify-email/email={email}" },
+                    self: { href: "/accounts/resend-verify-email" },
+                    next: { href: "/accounts/resend-verify-email" },
                     prev: { href: "/" }
                 }
             });
@@ -199,7 +199,7 @@ export class UserService {
                 message: `error with activation code`,
                 _links: {
                     self: { href: "/accounts/verify-email/email=user-email/code=user-code" },
-                    next: { href: "/accounts/resend-verify-email/email={email}" },
+                    next: { href: "/accounts/resend-verify-email" },
                     prev: { href: "/" }
                 }
             });
@@ -240,7 +240,7 @@ export class UserService {
                 message: `code submission service (${error})`,
                 _links: {
                     self: { href: "/accounts/signup" },
-                    next: { href: "/accounts/resend-verify-email/email={email}" },
+                    next: { href: "/accounts/resend-verify-email" },
                     prev: { href: "/" }
                 }
             });

@@ -18,7 +18,7 @@ export class UserController {
     }
 
     @ApiQuery({ type: resendUserDTO})
-    @Post('resend-verify-email/email=:email')
+    @Post('resend-verify-email')
     async resendVerifyEmailCode(@Body(new ValidationPipe({ transform: true })) resendEmailDto: resendUserDTO): Promise<any> {
         return await this.userService.resendVerifyEmailCode(resendEmailDto);
     }
