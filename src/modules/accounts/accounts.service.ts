@@ -39,7 +39,6 @@ export class UserService {
         newUser.password = await this.hashPassword(userDto.password);
 
         try {
-
             await this.userRepository.manager.transaction(async transactionalEntityManager => {
 
                 // commit user
