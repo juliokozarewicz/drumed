@@ -30,9 +30,9 @@ export class UserService {
                 statusCode: 409,
                 message: `email already registered`,
                 _links: {
-                    self: { href: "/accounts/signup" },
-                    next: { href: "/accounts/signup" },
-                    prev: { href: "/accounts/signup" }
+                    self: { href: "/accounts/login" },
+                    next: { href: "/accounts/login" },
+                    prev: { href: "/accounts/login" }
                 }
             });
         }
@@ -74,7 +74,7 @@ export class UserService {
                 _links: {
                     self: { href: "/accounts/signup" },
                     next: { href: `/accounts/verify-email/email=user-email/code=user-code`},
-                    prev: { href: "/" }
+                    prev: { href: "/accounts/login" }
                 }
             };
         } catch (error) {
@@ -115,9 +115,9 @@ export class UserService {
                     statusCode: 409,
                     message: `account with email activated`,
                     _links: {
-                        self: { href: "/accounts/signup" },
-                        next: { href: "/accounts/signup" },
-                        prev: { href: "/accounts/signup" }
+                        self: { href: "/accounts/login" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
                     }
                 });
             }
@@ -149,11 +149,18 @@ export class UserService {
             };
 
         } catch (error) {
-            return error
+            throw new BadRequestException({
+                statusCode: 400,
+                message: `email activation code resend (${error})`,
+                _links: {
+                    self: { href: "/accounts/resend-verify-email/email={email}" },
+                    next: { href: "/accounts/resend-verify-email/email={email}" },
+                    prev: { href: "/" }
+                }
+            });
         }
-
     }
-    
+
     // Verify email
     async verifyEmailCode(accActivateDTO: CodeAccountActivateDTO): Promise<any> {
         try {
@@ -178,7 +185,7 @@ export class UserService {
                     message: "account activated successfully",
                     _links: {
                         self: { href: `/accounts/verify-email/email=user-email/code=user-code` },
-                        next: { href: "/" },
+                        next: { href: "/accounts/login" },
                         prev: { href: "/accounts/signup" }
                     }
                 };
@@ -192,13 +199,12 @@ export class UserService {
                 message: `error with activation code`,
                 _links: {
                     self: { href: "/accounts/verify-email/email=user-email/code=user-code" },
-                    next: { href: "/accounts/resend-verify-email" },
-                    prev: { href: "/accounts/signup" }
+                    next: { href: "/accounts/resend-verify-email/email={email}" },
+                    prev: { href: "/" }
                 }
             });
         }
     }
-
 
     // Password hash
     private async hashPassword(password: string): Promise<string> {
@@ -234,8 +240,8 @@ export class UserService {
                 message: `code submission service (${error})`,
                 _links: {
                     self: { href: "/accounts/signup" },
-                    next: { href: "/accounts/signup" },
-                    prev: { href: "/accounts/signup" }
+                    next: { href: "/accounts/resend-verify-email/email={email}" },
+                    prev: { href: "/" }
                 }
             });
         }
