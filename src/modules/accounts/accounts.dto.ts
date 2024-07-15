@@ -79,7 +79,7 @@ export class ProfileDTO {
 
 export class CodeAccountActivateDTO {
 
-    @ApiProperty({ 
+    @ApiProperty({
         example: 'robertfolk@gmail.com', 
     })
     @IsEmail({}, { message: 'Please enter a valid email address' })

@@ -1,6 +1,6 @@
 // email.service.ts
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
@@ -23,10 +23,22 @@ export class EmailService {
   }
 
   async sendTextEmail(to: string, subject: string, text: string): Promise<void> {
-    await this.transporter.sendMail({
-      to,
-      subject,
-      text,
+
+    try {
+      await this.transporter.sendMail({
+        to,
+        subject,
+        text,
+      });
+  } catch (error) {
+    throw new BadRequestException({
+      statusCode: 400,
+      message: `email sending service`,
+      _links: {
+          self: { href: "/accounts/signup" },
+          next: { href: "/accounts/signup" },
+          prev: { href: "/accounts/signup" }
+      }
     });
-  }
+  }}
 }

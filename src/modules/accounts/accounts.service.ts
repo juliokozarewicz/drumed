@@ -37,8 +37,6 @@ export class UserService {
         newUser.email = sanitizeEmail(userDto.email);
         newUser.isEmailConfirmed = userDto.isEmailConfirmed;
         newUser.password = await this.hashPassword(userDto.password);
-        const hashString = `${Date.now()*100}${userDto.email}${process.env.API_SECURITY_CODE}`;
-        const codeAccount = crypto.createHash('sha256').update(hashString).digest('hex');
 
         try {
 
@@ -52,29 +50,15 @@ export class UserService {
                 newProfile.id = savedUser.id;
                 await transactionalEntityManager.save(newProfile);
 
+                // Send email
+                const codeAccount = await this.sendCodeVerifyEmail(newUser.email)
+
                 // commit code activate
                 const codeAccActivate = new CodeAccountActivate();
                 codeAccActivate.id = savedUser.id;
                 codeAccActivate.code = codeAccount;
                 codeAccActivate.email = savedUser.email;
                 await transactionalEntityManager.save(codeAccActivate);
-
-                // send email code for acc activate
-                // -----------------------------------------------------------
-                const activationLink = (
-                    `http://${process.env.DOMAIN_NAME}/accounts/verify-email/` +
-                    `email=${encodeURIComponent(newUser.email)}/` +
-                    `code=${encodeURIComponent(codeAccount)}`
-                )
-                const to = newUser.email;
-                const subject = `${process.env.API_NAME} - Account activation`;
-                const text = (
-                    `Click the link in this email to activate your ` + 
-                    `account:\n\n\n${activationLink}`
-                );
-
-                await this.emailService.sendTextEmail(to, subject, text);
-                // -----------------------------------------------------------
             });
 
             return {
@@ -89,7 +73,7 @@ export class UserService {
         } catch (error) {
             throw new BadRequestException({
                 statusCode: 400,
-                message: `an error occurred`,
+                message: `an error occurred:  [${error}]`,
                 _links: {
                     self: { href: "/accounts/signup" },
                     next: { href: "/accounts/signup" },
@@ -144,10 +128,44 @@ export class UserService {
         }
     }
 
-    // password hash
+    // Password hash
     private async hashPassword(password: string): Promise<string> {
         const saltRounds = 12;
         return bcrypt.hash(password, saltRounds);
     }
 
+    // Send code verify-email
+    private async sendCodeVerifyEmail(email: string): Promise<string> {
+
+        try {
+            const hashString = `${Date.now()*100}${email}${process.env.API_SECURITY_CODE}`;
+            const codeAccount = crypto.createHash('sha256').update(hashString).digest('hex');
+
+            const activationLink = (
+                `http://${process.env.DOMAIN_NAME}/accounts/verify-email/` +
+                `email=${encodeURIComponent(email)}/` +
+                `code=${encodeURIComponent(codeAccount)}`
+            )
+            const to = email;
+            const subject = `${process.env.API_NAME} - Account activation`;
+            const text = (
+                `Click the link in this email to activate your ` + 
+                `account:\n\n\n${activationLink}`
+            );
+
+            await this.emailService.sendTextEmail(to, subject, text);
+
+            return codeAccount
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: 400,
+                message: `code submission service (${error})`,
+                _links: {
+                    self: { href: "/accounts/signup" },
+                    next: { href: "/accounts/signup" },
+                    prev: { href: "/accounts/signup" }
+                }
+            });
+        }
+    }
 }
