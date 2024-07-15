@@ -26,7 +26,15 @@ export class UserService {
         // existing email verification
         const existingUser = await this.userRepository.findOne({ where: { email: userDto.email } });
         if (existingUser) {
-            throw new ConflictException('email already registered');
+            throw new ConflictException({
+                statusCode: 409,
+                message: `email already registered`,
+                _links: {
+                    self: { href: "/accounts/signup" },
+                    next: { href: "/accounts/signup" },
+                    prev: { href: "/accounts/signup" }
+                }
+            });
         }
 
         // insert data user
