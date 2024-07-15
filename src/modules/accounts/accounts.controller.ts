@@ -1,6 +1,5 @@
 import { Controller, Post, Body, ValidationPipe, Get, Param } from '@nestjs/common';
 import { CodeAccountActivateDTO, UserEntityDTO } from './accounts.dto';
-import { UserEntity } from './accounts.entity';
 import { UserService } from './accounts.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 

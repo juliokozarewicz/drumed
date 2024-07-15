@@ -5,8 +5,8 @@ import { CodeAccountActivateDTO, UserEntityDTO } from './accounts.dto';
 import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
-import { EmailService } from '../email/email.service';
 import * as crypto from 'crypto';
+import { EmailService } from './accounts.email';
 
 
 @Injectable()
@@ -37,7 +37,8 @@ export class UserService {
         newUser.email = sanitizeEmail(userDto.email);
         newUser.isEmailConfirmed = userDto.isEmailConfirmed;
         newUser.password = await this.hashPassword(userDto.password);
-        const codeAccount = crypto.createHash('sha256').update(newUser.email).digest('hex');
+        const hashString = `${Date.now()*100}${userDto.email}${process.env.API_SECURITY_CODE}`;
+        const codeAccount = crypto.createHash('sha256').update(hashString).digest('hex');
 
         try {
 
@@ -67,7 +68,10 @@ export class UserService {
                 )
                 const to = newUser.email;
                 const subject = `${process.env.API_NAME} - Account activation`;
-                const text = `Click the link in this email to activate your account:\n\n\n${activationLink}`;
+                const text = (
+                    `Click the link in this email to activate your ` + 
+                    `account:\n\n\n${activationLink}`
+                );
 
                 await this.emailService.sendTextEmail(to, subject, text);
                 // -----------------------------------------------------------
@@ -132,7 +136,7 @@ export class UserService {
                 statusCode: 400,
                 message: `error with activation code`,
                 _links: {
-                    self: { href: "/accounts/verify-email" },
+                    self: { href: "/accounts/verify-email/email=user-email/code=user-code" },
                     next: { href: "/accounts/resend-verify-email" },
                     prev: { href: "/accounts/signup" }
                 }
