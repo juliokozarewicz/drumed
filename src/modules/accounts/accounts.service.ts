@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CodeAccountActivateDTO, UserEntityDTO } from './accounts.dto';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO } from './accounts.dto';
 import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
@@ -70,7 +70,7 @@ export class UserService {
 
             return {
                 statusCode: 201,
-                message: "User created successfully",
+                message: "user created successfully",
                 _links: {
                     self: { href: "/accounts/signup" },
                     next: { href: `/accounts/verify-email/email=user-email/code=user-code`},
@@ -89,7 +89,71 @@ export class UserService {
             });
         }
     }
+    
+    // Resend verify email
+    async resendVerifyEmailCode(resendActivateDTO: resendUserDTO): Promise<any> {
 
+        try {
+            // existing email verification
+            const existingUser = await this.userRepository.findOne({ where: { email: resendActivateDTO.email } });
+
+            if (!existingUser) {
+                throw new BadRequestException({
+                    statusCode: 409,
+                    message: `email not registered`,
+                    _links: {
+                        self: { href: "/accounts/signup" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/signup" }
+                    }
+                });
+            }
+
+            // activated email
+            if (existingUser.isEmailConfirmed) {
+                throw new BadRequestException({
+                    statusCode: 409,
+                    message: `account with email activated`,
+                    _links: {
+                        self: { href: "/accounts/signup" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/signup" }
+                    }
+                });
+            }
+
+            // delete existing codes
+            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: resendActivateDTO.email } } );
+
+            for (let i = 0; i < deleteAllCodes.length; i++) {
+                await this.userAccCodeActivate.remove(deleteAllCodes[i]);
+            }
+
+            await this.userRepository.manager.transaction(async transactionalResendCodeManager => {
+                const codeAccount = await this.sendCodeVerifyEmail(resendActivateDTO.email)
+
+                const codeAccActivate = new CodeAccountActivate();
+                codeAccActivate.code = codeAccount;
+                codeAccActivate.email = resendActivateDTO.email;
+                await transactionalResendCodeManager.save(codeAccActivate);
+            })
+
+            return {
+                statusCode: 201,
+                message: "code resent successfully",
+                _links: {
+                    self: { href: "/accounts/signup" },
+                    next: { href: `/accounts/verify-email/email=user-email/code=user-code`},
+                    prev: { href: "/" }
+                }
+            };
+
+        } catch (error) {
+            return error
+        }
+
+    }
+    
     // Verify email
     async verifyEmailCode(accActivateDTO: CodeAccountActivateDTO): Promise<any> {
         try {
@@ -134,6 +198,7 @@ export class UserService {
             });
         }
     }
+
 
     // Password hash
     private async hashPassword(password: string): Promise<string> {

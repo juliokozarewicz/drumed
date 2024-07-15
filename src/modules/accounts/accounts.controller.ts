@@ -1,5 +1,5 @@
 import { Controller, Post, Body, ValidationPipe, Get, Param } from '@nestjs/common';
-import { CodeAccountActivateDTO, UserEntityDTO } from './accounts.dto';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO } from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
@@ -15,6 +15,12 @@ export class UserController {
     @Post('signup')
     async createUser(@Body(new ValidationPipe({ transform: true })) createUserDto: UserEntityDTO): Promise<any> {
         return await this.userService.createUser(createUserDto);
+    }
+
+    @ApiQuery({ type: resendUserDTO})
+    @Post('resend-verify-email/email=:email')
+    async resendVerifyEmailCode(@Body(new ValidationPipe({ transform: true })) resendEmailDto: resendUserDTO): Promise<any> {
+        return await this.userService.resendVerifyEmailCode(resendEmailDto);
     }
 
     @Get('verify-email/email=:email/code=:code')

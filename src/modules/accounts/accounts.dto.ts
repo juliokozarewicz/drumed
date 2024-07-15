@@ -50,6 +50,16 @@ export class UserEntityDTO {
     }
 }
 
+export class resendUserDTO {
+
+    @ApiProperty({ 
+        example: 'robertfolk@gmail.com', 
+    })
+    @IsEmail({}, { message: 'Please enter a valid email address' })
+    email: string;
+
+}
+
 export class ProfileDTO {
 
     @ApiProperty({ 
