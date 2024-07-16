@@ -1,4 +1,4 @@
-import { Controller, Post, Body, ValidationPipe, Get, Param, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, Get, Param, Res } from '@nestjs/common';
 import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO } from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
