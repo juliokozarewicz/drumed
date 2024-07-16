@@ -7,10 +7,12 @@ import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
 import * as crypto from 'crypto';
 import { EmailService } from './accounts.email';
+import { logsGenerator } from './accounts.logs';
 
 
 @Injectable()
 export class UserService {
+
     constructor(
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
@@ -37,16 +39,17 @@ export class UserService {
             });
         }
 
-        // insert data user
-        const newUser = new UserEntity();
-        newUser.isActive = userDto.isActive;
-        newUser.level = userDto.level;
-        newUser.name = sanitizeNameString(userDto.name);
-        newUser.email = sanitizeEmail(userDto.email);
-        newUser.isEmailConfirmed = userDto.isEmailConfirmed;
-        newUser.password = await this.hashPassword(userDto.password);
-
         try {
+            
+            // insert data user
+            const newUser = new UserEntity();
+            newUser.isActive = userDto.isActive;
+            newUser.level = userDto.level;
+            newUser.name = sanitizeNameString(userDto.name);
+            newUser.email = sanitizeEmail(userDto.email);
+            newUser.isEmailConfirmed = userDto.isEmailConfirmed;
+            newUser.password = await this.hashPassword(userDto.password);
+
             await this.userRepository.manager.transaction(async transactionalEntityManager => {
 
                 // commit user
@@ -78,9 +81,10 @@ export class UserService {
                 }
             };
         } catch (error) {
+            logsGenerator('error', `create user service [createUser()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 400,
-                message: `an error occurred:  [${error}]`,
+                message: `an error occurred`,
                 _links: {
                     self: { href: "/accounts/signup" },
                     next: { href: "/accounts/signup" },
@@ -149,9 +153,10 @@ export class UserService {
             };
 
         } catch (error) {
+            logsGenerator('error', `resend link email verify email [resendVerifyEmailCode()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 400,
-                message: `email activation code resend (${error})`,
+                message: `an error occurred`,
                 _links: {
                     self: { href: "/accounts/resend-verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
@@ -190,6 +195,7 @@ export class UserService {
                     }
                 };
             } else {
+                logsGenerator('error', `verify email code not valid [verifyEmailCode()]`)
                 throw new BadRequestException();
             }
 
@@ -208,8 +214,12 @@ export class UserService {
 
     // Password hash
     private async hashPassword(password: string): Promise<string> {
-        const saltRounds = 12;
-        return bcrypt.hash(password, saltRounds);
+        try {
+            const saltRounds = 12;
+            return bcrypt.hash(password, saltRounds);
+        } catch (error) {
+            logsGenerator('error', `bcrypt error [hashPassword()]: ${error}`)
+        }
     }
 
     // Send code verify-email
@@ -235,15 +245,8 @@ export class UserService {
 
             return codeAccount
         } catch (error) {
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `code submission service (${error})`,
-                _links: {
-                    self: { href: "/accounts/signup" },
-                    next: { href: "/accounts/resend-verify-email" },
-                    prev: { href: "/" }
-                }
-            });
+            logsGenerator('error', `code submission service [sendCodeVerifyEmail()]: ${error}`)
+            throw new BadRequestException();
         }
     }
 }

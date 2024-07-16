@@ -2,6 +2,7 @@
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { logsGenerator } from './accounts.logs';
 
 @Injectable()
 export class EmailService {
@@ -30,15 +31,8 @@ export class EmailService {
         subject,
         text,
       });
-  } catch (error) {
-    throw new BadRequestException({
-      statusCode: 400,
-      message: `email sending service`,
-      _links: {
-          self: { href: "/accounts/signup" },
-          next: { href: "/accounts/signup" },
-          prev: { href: "/accounts/signup" }
-      }
-    });
-  }}
+    } catch (error) {
+      logsGenerator('error', 'email sending service [sendTextEmail()]')
+      throw new BadRequestException();
+    }}
 }

@@ -1,8 +1,8 @@
-import { Controller, Post, Body, ValidationPipe, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, Get, Param, Res, HttpStatus } from '@nestjs/common';
 import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO } from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
-
+import { Response } from 'express';
 
 @ApiTags('ACCOUNTS')
 @Controller('accounts')
@@ -24,8 +24,13 @@ export class UserController {
     }
 
     @Get('verify-email/email=:email/code=:code')
-    async verifyEmailCode(@Param() activateDTO: CodeAccountActivateDTO): Promise<any> {
-        return await this.userService.verifyEmailCode(activateDTO);
+    async verifyEmailCode(@Param() activateDTO: CodeAccountActivateDTO, @Res() res: Response): Promise<any> {
+        try {
+            const message_return = await this.userService.verifyEmailCode(activateDTO);
+            return res.redirect(`/accounts/login?message=${encodeURIComponent(message_return.message)}`);
+        } catch (error) {
+            return res.redirect(`/accounts/resend-verify-email?message=${encodeURIComponent(error)}`);
+        }
     }
 
 }
