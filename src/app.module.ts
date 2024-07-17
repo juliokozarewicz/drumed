@@ -5,9 +5,15 @@ import { drugModule } from './modules/drugs/drugs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AccountsModule } from './modules/accounts/accounts.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+
+    ThrottlerModule.forRoot([{
+      ttl: 600000,
+      limit: 100,
+    }]),
 
     drugModule,
     AccountsModule,

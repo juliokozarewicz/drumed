@@ -1,11 +1,13 @@
-import { Controller, Post, Body, ValidationPipe, Get, Param, Res } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, Get, Param, Res, UseGuards } from '@nestjs/common';
 import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO } from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('ACCOUNTS')
 @Controller('accounts')
+@UseGuards(ThrottlerGuard)
 export class UserController {
     constructor(
         private readonly userService: UserService,
