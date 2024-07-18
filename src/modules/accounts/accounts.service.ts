@@ -61,7 +61,7 @@ export class UserService {
                 await transactionalEntityManager.save(newProfile);
 
                 // Send email
-                const codeAccount = await this.sendCodeVerifyEmail(newUser.email)
+                const codeAccount = await this.sendCodeVerifyEmail(userDto.urlRedirect ,newUser.email)
 
                 // commit code activate
                 const codeAccActivate = new CodeAccountActivate();
@@ -84,7 +84,7 @@ export class UserService {
             logsGenerator('error', `create user service [createUser()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 400,
-                message: `an error occurred`,
+                message: `an error occurred: ${error}`,
                 _links: {
                     self: { href: "/accounts/signup" },
                     next: { href: "/accounts/signup" },
@@ -134,7 +134,7 @@ export class UserService {
             }
 
             await this.userRepository.manager.transaction(async transactionalResendCodeManager => {
-                const codeAccount = await this.sendCodeVerifyEmail(resendActivateDTO.email)
+                const codeAccount = await this.sendCodeVerifyEmail(resendActivateDTO.urlRedirect, resendActivateDTO.email)
 
                 const codeAccActivate = new CodeAccountActivate();
                 codeAccActivate.code = codeAccount;
@@ -153,10 +153,10 @@ export class UserService {
             };
 
         } catch (error) {
-            logsGenerator('error', `resend link email verify email [resendVerifyEmailCode()]: ${error}`)
+            logsGenerator('error', `error when resending the email link [resendVerifyEmailCode()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 400,
-                message: `an error occurred`,
+                message: `error when resending the email link: (${error})`,
                 _links: {
                     self: { href: "/accounts/resend-verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
@@ -189,14 +189,22 @@ export class UserService {
                     statusCode: 201,
                     message: "account activated successfully",
                     _links: {
-                        self: { href: `/accounts/verify-email/email=user-email/code=user-code` },
+                        self: { href: `/accounts/verify-email` },
                         next: { href: "/accounts/login" },
                         prev: { href: "/accounts/signup" }
                     }
                 };
             } else {
                 logsGenerator('error', `verify email code not valid [verifyEmailCode()]`)
-                throw new BadRequestException();
+                throw new BadRequestException({
+                    statusCode: 400,
+                    message: `verify email code not valid [verifyEmailCode()]`,
+                    _links: {
+                        self: { href: "/accounts/verify-email" },
+                        next: { href: "/accounts/resend-verify-email" },
+                        prev: { href: "/" }
+                    }
+                });
             }
 
         } catch (error) {
@@ -204,7 +212,7 @@ export class UserService {
                 statusCode: 400,
                 message: `error with activation code`,
                 _links: {
-                    self: { href: "/accounts/verify-email/email=user-email/code=user-code" },
+                    self: { href: "/accounts/verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
                     prev: { href: "/" }
                 }
@@ -223,15 +231,15 @@ export class UserService {
     }
 
     // Send code verify-email
-    private async sendCodeVerifyEmail(email: string): Promise<string> {
+    private async sendCodeVerifyEmail(link: string, email: string): Promise<string> {
 
         try {
             const hashString = `${Date.now()*100}${email}${process.env.API_SECURITY_CODE}`;
             const codeAccount = crypto.createHash('sha256').update(hashString).digest('hex');
 
             const activationLink = (
-                `http://${process.env.DOMAIN_NAME}/accounts/verify-email/` +
-                `email=${encodeURIComponent(email)}/` +
+                `${link}?` +
+                `email=${email}&` +
                 `code=${encodeURIComponent(codeAccount)}`
             )
             const to = email;
@@ -245,8 +253,16 @@ export class UserService {
 
             return codeAccount
         } catch (error) {
-            logsGenerator('error', `code submission service [sendCodeVerifyEmail()]: ${error}`)
-            throw new BadRequestException();
+            logsGenerator('error', `code delivery service via email [sendCodeVerifyEmail()]: ${error}`)
+            throw new BadRequestException({
+                statusCode: 400,
+                message: `code delivery service via email`,
+                _links: {
+                    self: { href: "/accounts/verify-email" },
+                    next: { href: "/accounts/resend-verify-email" },
+                    prev: { href: "/" }
+                }
+            });
         }
     }
 }

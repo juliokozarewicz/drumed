@@ -25,14 +25,10 @@ export class UserController {
         return await this.userService.resendVerifyEmailCode(resendEmailDto);
     }
 
-    @Get('verify-email/email=:email/code=:code')
-    async verifyEmailCode(@Param() activateDTO: CodeAccountActivateDTO, @Res() res: Response): Promise<any> {
-        try {
-            const message_return = await this.userService.verifyEmailCode(activateDTO);
-            return res.redirect(`/accounts/login?message=${encodeURIComponent(message_return.message)}`);
-        } catch (error) {
-            return res.redirect(`/accounts/resend-verify-email?message=${encodeURIComponent(error)}`);
-        }
+    @ApiQuery({ type: CodeAccountActivateDTO})
+    @Post('verify-email')
+    async verifyEmailCode (@Body(new ValidationPipe({ transform: true })) activateDTO: CodeAccountActivateDTO): Promise<any> { 
+        return await this.userService.verifyEmailCode(activateDTO);
     }
 
 }

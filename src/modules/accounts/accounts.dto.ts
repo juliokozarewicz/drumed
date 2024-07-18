@@ -30,6 +30,14 @@ export class UserEntityDTO {
     isEmailConfirmed: boolean;
 
     @ApiProperty({ 
+        example: "www.yourlink.com/auth/login",
+    })
+    @IsNotEmpty()
+    @IsString()
+    @Length(1, 255)
+    urlRedirect: string;
+
+    @ApiProperty({ 
         example: '$2b$10$hi5p9zPdA2z7qGy4QF5OP.xONlFhwBwJr8FMTZPmeWudZdVnBB2cq', 
     })
     @IsNotEmpty()
@@ -57,6 +65,14 @@ export class resendUserDTO {
     })
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
+
+    @ApiProperty({ 
+        example: "www.yourlink.com/auth/login",
+    })
+    @IsNotEmpty()
+    @IsString()
+    @Length(1, 255)
+    urlRedirect: string;
 
 }
 
@@ -102,4 +118,12 @@ export class CodeAccountActivateDTO {
     @IsString()
     @Length(1, 515)
     code: string;
+
+    @ApiProperty({ 
+        example: "www.yourlink.com/auth/login",
+    })
+    @IsNotEmpty()
+    @IsString()
+    @Length(1, 255)
+    urlRedirect: string;
 }
