@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO } from './accounts.dto';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO } from './accounts.dto';
 import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
@@ -26,7 +26,7 @@ export class UserService {
     async createUser(userDto: UserEntityDTO): Promise<any> {
 
         // existing email verification
-        const existingUser = await this.userRepository.findOne({ where: { email: userDto.email } });
+        const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(userDto.email) } });
         if (existingUser) {
             throw new ConflictException({
                 statusCode: 409,
@@ -61,13 +61,13 @@ export class UserService {
                 await transactionalEntityManager.save(newProfile);
 
                 // Send email
-                const codeAccount = await this.sendCodeVerifyEmail(userDto.urlRedirect ,newUser.email)
+                const codeAccount = await this.sendCodeVerifyEmail(userDto.urlRedirect, sanitizeEmail(newUser.email))
 
                 // commit code activate
                 const codeAccActivate = new CodeAccountActivate();
                 codeAccActivate.id = savedUser.id;
                 codeAccActivate.code = codeAccount;
-                codeAccActivate.email = savedUser.email;
+                codeAccActivate.email = sanitizeEmail(savedUser.email);
                 await transactionalEntityManager.save(codeAccActivate);
             });
 
@@ -93,13 +93,13 @@ export class UserService {
             });
         }
     }
-    
+
     // Resend verify email
     async resendVerifyEmailCode(resendActivateDTO: resendUserDTO): Promise<any> {
 
         try {
             // existing email verification
-            const existingUser = await this.userRepository.findOne({ where: { email: resendActivateDTO.email } });
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(resendActivateDTO.email) } });
 
             if (!existingUser) {
                 throw new BadRequestException({
@@ -127,18 +127,18 @@ export class UserService {
             }
 
             // delete existing codes
-            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: resendActivateDTO.email } } );
+            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(resendActivateDTO.email) } } );
 
             for (let i = 0; i < deleteAllCodes.length; i++) {
                 await this.userAccCodeActivate.remove(deleteAllCodes[i]);
             }
 
             await this.userRepository.manager.transaction(async transactionalResendCodeManager => {
-                const codeAccount = await this.sendCodeVerifyEmail(resendActivateDTO.urlRedirect, resendActivateDTO.email)
+                const codeAccount = await this.sendCodeVerifyEmail(resendActivateDTO.urlRedirect, sanitizeEmail(resendActivateDTO.email))
 
                 const codeAccActivate = new CodeAccountActivate();
                 codeAccActivate.code = codeAccount;
-                codeAccActivate.email = resendActivateDTO.email;
+                codeAccActivate.email = sanitizeEmail(resendActivateDTO.email);
                 await transactionalResendCodeManager.save(codeAccActivate);
             })
 
@@ -169,19 +169,19 @@ export class UserService {
     // Verify email
     async verifyEmailCode(accActivateDTO: CodeAccountActivateDTO): Promise<any> {
         try {
-            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: accActivateDTO.email, code: accActivateDTO.code}});
+            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(accActivateDTO.email), code: accActivateDTO.code}});
 
             if (CodeAccActivate) {
 
                 // delete all codes
-                const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: accActivateDTO.email } } );
+                const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(accActivateDTO.email) } } );
 
                 for (let i = 0; i < deleteAllCodes.length; i++) {
                     await this.userAccCodeActivate.remove(deleteAllCodes[i]);
                 }
 
                 // Active account
-                const activeAccEnd = await this.userRepository.findOne( { where: { email: accActivateDTO.email} } );
+                const activeAccEnd = await this.userRepository.findOne( { where: { email: sanitizeEmail(accActivateDTO.email) } } );
                 activeAccEnd.isEmailConfirmed = true;
                 await this.userRepository.save(activeAccEnd);
 
@@ -217,6 +217,15 @@ export class UserService {
                     prev: { href: "/" }
                 }
             });
+        }
+    }
+
+    // Change password
+    async changePasswordLink(changePasswordLinkDTO: changePasswordLinkDTO): Promise<any> {
+        try {
+            return {coreto: '1'};
+        } catch (error) {
+            return {erro: '1'};
         }
     }
 

@@ -1,8 +1,7 @@
-import { Controller, Post, Body, ValidationPipe, Get, Param, Res, UseGuards } from '@nestjs/common';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO } from './accounts.dto';
+import { Controller, Post, Body, ValidationPipe, UseGuards } from '@nestjs/common';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO } from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('ACCOUNTS')
@@ -31,4 +30,9 @@ export class UserController {
         return await this.userService.verifyEmailCode(activateDTO);
     }
 
+    @ApiQuery({ type: changePasswordLinkDTO})
+    @Post('change-password-link')
+    async changePasswordLink(@Body(new ValidationPipe({ transform: true })) changePasswordLinkDTO: changePasswordLinkDTO): Promise<any> { 
+        return await this.userService.changePasswordLink(changePasswordLinkDTO);
+    }
 }
