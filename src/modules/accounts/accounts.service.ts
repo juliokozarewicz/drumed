@@ -25,8 +25,10 @@ export class UserService {
     // insert new user
     async createUser(userDto: UserEntityDTO): Promise<any> {
 
-        // existing email verification
+        // get user data
         const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(userDto.email) } });
+
+        // existing email verification
         if (existingUser) {
             throw new ConflictException({
                 statusCode: 409,
@@ -34,7 +36,7 @@ export class UserService {
                 _links: {
                     self: { href: "/accounts/signup" },
                     next: { href: "/accounts/login" },
-                    prev: { href: "/" }
+                    prev: { href: "/accounts/login" }
                 }
             });
         }
@@ -61,7 +63,8 @@ export class UserService {
                 await transactionalEntityManager.save(newProfile);
 
                 // Send email
-                const codeAccount = await this.sendCodeVerifyEmail(userDto.urlRedirect, sanitizeEmail(newUser.email))
+                const textSend = `Click the link in this email to activate your account`;
+                const codeAccount = await this.sendEmailVerify(userDto.urlRedirect, sanitizeEmail(newUser.email), textSend)
 
                 // commit code activate
                 const codeAccActivate = new CodeAccountActivate();
@@ -98,9 +101,10 @@ export class UserService {
     async resendVerifyEmailCode(resendActivateDTO: resendUserDTO): Promise<any> {
 
         try {
-            // existing email verification
+            // get user data
             const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(resendActivateDTO.email) } });
 
+            // existing email verification
             if (!existingUser) {
                 throw new BadRequestException({
                     statusCode: 409,
@@ -121,7 +125,7 @@ export class UserService {
                     _links: {
                         self: { href: "/accounts/resend-verify-email" },
                         next: { href: "/accounts/login" },
-                        prev: { href: "/" }
+                        prev: { href: "/accounts/login" }
                     }
                 });
             }
@@ -134,7 +138,8 @@ export class UserService {
             }
 
             await this.userRepository.manager.transaction(async transactionalResendCodeManager => {
-                const codeAccount = await this.sendCodeVerifyEmail(resendActivateDTO.urlRedirect, sanitizeEmail(resendActivateDTO.email))
+                const textSend = `Click the link in this email to activate your account`;
+                const codeAccount = await this.sendEmailVerify(resendActivateDTO.urlRedirect, sanitizeEmail(resendActivateDTO.email), textSend)
 
                 const codeAccActivate = new CodeAccountActivate();
                 codeAccActivate.code = codeAccount;
@@ -148,7 +153,7 @@ export class UserService {
                 _links: {
                     self: { href: "/accounts/resend-verify-email" },
                     next: { href: `/accounts/login`},
-                    prev: { href: "/" }
+                    prev: { href: "/accounts/login" }
                 }
             };
 
@@ -160,7 +165,7 @@ export class UserService {
                 _links: {
                     self: { href: "/accounts/resend-verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
-                    prev: { href: "/" }
+                    prev: { href: "/accounts/login" }
                 }
             });
         }
@@ -202,7 +207,7 @@ export class UserService {
                     _links: {
                         self: { href: "/accounts/verify-email" },
                         next: { href: "/accounts/resend-verify-email" },
-                        prev: { href: "/" }
+                        prev: { href: "/accounts/login" }
                     }
                 });
             }
@@ -214,7 +219,7 @@ export class UserService {
                 _links: {
                     self: { href: "/accounts/verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
-                    prev: { href: "/" }
+                    prev: { href: "/accounts/login" }
                 }
             });
         }
@@ -223,9 +228,74 @@ export class UserService {
     // Change password
     async changePasswordLink(changePasswordLinkDTO: changePasswordLinkDTO): Promise<any> {
         try {
-            return {coreto: '1'};
+            // get user data
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordLinkDTO.email) } });
+            
+            // existing email verification
+            if (!existingUser) {
+                throw new BadRequestException({
+                    statusCode: 409,
+                    message: `email not registered`,
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // email not activated
+            if (existingUser.isEmailConfirmed === false) {
+                throw new BadRequestException({
+                    statusCode: 409,
+                    message: `email not activated`,
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // delete existing codes
+            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(changePasswordLinkDTO.email) } } );
+
+            for (let i = 0; i < deleteAllCodes.length; i++) {
+                await this.userAccCodeActivate.remove(deleteAllCodes[i]);
+            }
+
+            // save the code in the db and send the link via email
+            await this.userRepository.manager.transaction(async transactionalResendCodeManager => {
+                const textSend = `Click the link in this email to change your password`;
+                const codeAccount = await this.sendEmailVerify(changePasswordLinkDTO.urlRedirect, sanitizeEmail(changePasswordLinkDTO.email), textSend)
+
+                const codeAccActivate = new CodeAccountActivate();
+                codeAccActivate.code = codeAccount;
+                codeAccActivate.email = sanitizeEmail(changePasswordLinkDTO.email);
+                await transactionalResendCodeManager.save(codeAccActivate);
+            })
+
+            return {
+                statusCode: 201,
+                message: "password change link sent successfully",
+                _links: {
+                    self: { href: "/accounts/change-password-link" },
+                    next: { href: `/accounts/change-password`},
+                    prev: { href: "/accounts/login" }
+                }
+            };
+
         } catch (error) {
-            return {erro: '1'};
+            logsGenerator('error', `error sending password change link [changePasswordLink()]: ${error}`)
+            throw new BadRequestException({
+                statusCode: 400,
+                message: `error sending password change link: (${error})`,
+                _links: {
+                    self: { href: "/accounts/change-password-link" },
+                    next: { href: "/accounts/change-password-link" },
+                    prev: { href: "/accounts/login" }
+                }
+            });
         }
     }
 
@@ -240,7 +310,7 @@ export class UserService {
     }
 
     // Send code verify-email
-    private async sendCodeVerifyEmail(link: string, email: string): Promise<string> {
+    private async sendEmailVerify(link: string, email: string, textSend: string): Promise<string> {
 
         try {
             const hashString = `${Date.now()*100}${email}${process.env.API_SECURITY_CODE}`;
@@ -252,24 +322,21 @@ export class UserService {
                 `code=${encodeURIComponent(codeAccount)}`
             )
             const to = email;
-            const subject = `${process.env.API_NAME} - Account activation`;
-            const text = (
-                `Click the link in this email to activate your ` + 
-                `account:\n\n\n${activationLink}`
-            );
+            const subject = `${process.env.API_NAME} - Account Service`;
+            const text = (`${textSend}: \n\n\n${activationLink}`);
 
             await this.emailService.sendTextEmail(to, subject, text);
 
             return codeAccount
         } catch (error) {
-            logsGenerator('error', `code delivery service via email [sendCodeVerifyEmail()]: ${error}`)
+            logsGenerator('error', `code delivery service via email [sendEmailVerify()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 400,
                 message: `code delivery service via email`,
                 _links: {
                     self: { href: "/accounts/verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
-                    prev: { href: "/" }
+                    prev: { href: "/accounts/login" }
                 }
             });
         }
