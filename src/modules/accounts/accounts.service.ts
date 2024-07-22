@@ -200,10 +200,10 @@ export class UserService {
                     }
                 };
             } else {
-                logsGenerator('error', `verify email code not valid [verifyEmailCode()]`)
+                logsGenerator('error', `invalid email verification code [verifyEmailCode()]`)
                 throw new BadRequestException({
                     statusCode: 400,
-                    message: `verify email code not valid [verifyEmailCode()]`,
+                    message: `invalid email verification code`,
                     _links: {
                         self: { href: "/accounts/verify-email" },
                         next: { href: "/accounts/resend-verify-email" },
@@ -299,17 +299,12 @@ export class UserService {
         }
     }
 
-
-
-
-
-
     // change password
     async changePassword(changePasswordDTO: changePasswordDTO): Promise<any> {
         try {
             // get user data
             const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email) } });
-            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email), code: changePasswordDTO.code}});
+            const CodeAccChange = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email), code: changePasswordDTO.code}});
 
             // existing email verification
             if (!existingUser) {
@@ -337,41 +332,56 @@ export class UserService {
                 });
             }
 
-            if (CodeAccActivate) {
-                // delete all codes
-                const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(accActivateDTO.email) } } );
+            if (CodeAccChange) {
+                await this.userRepository.manager.transaction(async transactionalEntityManager => {
+                    // delete all codes
+                    const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(changePasswordDTO.email) } } );
 
-                for (let i = 0; i < deleteAllCodes.length; i++) {
-                    await this.userAccCodeActivate.remove(deleteAllCodes[i]);
-                }
+                    for (let i = 0; i < deleteAllCodes.length; i++) {
+                        await this.userAccCodeActivate.remove(deleteAllCodes[i]);
+                    }
 
-                // change password #####
-
-                return {
-                    statusCode: 201,
-                    message: "password changed successfully",
+                    // change password
+                    const changePasswordDB = new UserEntity();
+                    changePasswordDB.id = existingUser.id;
+                    changePasswordDB.password = await this.hashPassword(changePasswordDTO.password);
+                    await transactionalEntityManager.save(changePasswordDB);
+                });
+            } else {
+                logsGenerator('error', `invalid password verification code [changePassword()]`)
+                throw new BadRequestException({
+                    statusCode: 400,
+                    message: `invalid password verification code`,
                     _links: {
-                        self: { href: `/accounts/change-password` },
-                        next: { href: "/accounts/login" },
+                        self: { href: "/accounts/change-password" },
+                        next: { href: "/accounts/change-password-link" },
                         prev: { href: "/accounts/login" }
                     }
-                };
+                });
             }
+
+            return {
+                statusCode: 201,
+                message: "password changed successfully",
+                _links: {
+                    self: { href: `/accounts/change-password` },
+                    next: { href: "/accounts/login" },
+                    prev: { href: "/accounts/login" }
+                }
+            };
         } catch (error) {
-            return error;
-        }  
+            logsGenerator('error', `create user service [createUser()]: ${error}`)
+            throw new BadRequestException({
+                statusCode: 400,
+                message: `an error occurred: ${error}`,
+                _links: {
+                    self: { href: "/accounts/change-password" },
+                    next: { href: "/accounts/change-password-link" },
+                    prev: { href: "/accounts/login" }
+                }
+            });
+        }
     }
-
-
-
-
-
-
-
-
-
-
-
 
     // Password hash
     private async hashPassword(password: string): Promise<string> {
