@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO } from './accounts.dto';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO } from './accounts.dto';
 import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
@@ -225,7 +225,7 @@ export class UserService {
         }
     }
 
-    // Change password
+    // Change password Link
     async changePasswordLink(changePasswordLinkDTO: changePasswordLinkDTO): Promise<any> {
         try {
             // get user data
@@ -251,7 +251,7 @@ export class UserService {
                     message: `email not activated`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
-                        next: { href: "/accounts/signup" },
+                        next: { href: "/accounts/resend-verify-email" },
                         prev: { href: "/accounts/login" }
                     }
                 });
@@ -298,6 +298,80 @@ export class UserService {
             });
         }
     }
+
+
+
+
+
+
+    // change password
+    async changePassword(changePasswordDTO: changePasswordDTO): Promise<any> {
+        try {
+            // get user data
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email) } });
+            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email), code: changePasswordDTO.code}});
+
+            // existing email verification
+            if (!existingUser) {
+                throw new BadRequestException({
+                    statusCode: 409,
+                    message: `email not registered`,
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // email not activated
+            if (existingUser.isEmailConfirmed === false) {
+                throw new BadRequestException({
+                    statusCode: 409,
+                    message: `email not activated`,
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/resend-verify-email" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            if (CodeAccActivate) {
+                // delete all codes
+                const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(accActivateDTO.email) } } );
+
+                for (let i = 0; i < deleteAllCodes.length; i++) {
+                    await this.userAccCodeActivate.remove(deleteAllCodes[i]);
+                }
+
+                // change password #####
+
+                return {
+                    statusCode: 201,
+                    message: "password changed successfully",
+                    _links: {
+                        self: { href: `/accounts/change-password` },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                };
+            }
+        } catch (error) {
+            return error;
+        }  
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     // Password hash
     private async hashPassword(password: string): Promise<string> {

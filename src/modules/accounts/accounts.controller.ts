@@ -1,5 +1,5 @@
 import { Controller, Post, Body, ValidationPipe, UseGuards } from '@nestjs/common';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO } from './accounts.dto';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO } from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -23,7 +23,7 @@ export class UserController {
     async resendVerifyEmailCode(@Body(new ValidationPipe({ transform: true })) resendEmailDto: resendUserDTO): Promise<any> {
         return await this.userService.resendVerifyEmailCode(resendEmailDto);
     }
-
+  
     @ApiQuery({ type: CodeAccountActivateDTO})
     @Post('verify-email')
     async verifyEmailCode (@Body(new ValidationPipe({ transform: true })) activateDTO: CodeAccountActivateDTO): Promise<any> { 
@@ -34,5 +34,11 @@ export class UserController {
     @Post('change-password-link')
     async changePasswordLink(@Body(new ValidationPipe({ transform: true })) changePasswordLinkDTO: changePasswordLinkDTO): Promise<any> { 
         return await this.userService.changePasswordLink(changePasswordLinkDTO);
+    }
+
+    @ApiQuery({ type: changePasswordDTO})
+    @Post('change-password')
+    async changePassword(@Body(new ValidationPipe({ transform: true })) changePasswordDTO: changePasswordDTO): Promise<any> { 
+        return await this.userService.changePassword(changePasswordDTO);
     }
 }
