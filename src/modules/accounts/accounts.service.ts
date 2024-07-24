@@ -395,32 +395,47 @@ export class UserService {
         }
     }
 
-    // login #####
+    // login
     async login(loginCredentials: LoginDTO): Promise<any> {
 
-        // get user data
-        const user = await this.userRepository.findOne({ where: { email: sanitizeEmail(loginCredentials.email) } });
+        try {
 
-        // verify credentials
-        if (!user || !await bcrypt.compare(loginCredentials.password, user.password)) {
+            // get user data
+            const user = await this.userRepository.findOne({ where: { email: sanitizeEmail(loginCredentials.email) } });
+
+            // verify credentials
+            if (!user || !await bcrypt.compare(loginCredentials.password, user.password)) {
+                throw new BadRequestException({
+                    statusCode: 401,
+                    message: `invalid credentials`,
+                    _links: {
+                        self: { href: "/accounts/login" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // token generator
+            const payload = { email: sanitizeEmail(loginCredentials.email), sub: user.id };
+            const jwtToken = {
+                "acessToken": this.jwtService.sign(payload)
+            };
+
+            return jwtToken;
+
+        } catch (error) {
+            logsGenerator('error', `login user service [login()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 401,
-                message: `invalid credentials`,
+                message: `an error occurred: ${error}`,
                 _links: {
-                    self: { href: "/accounts/login" },
-                    next: { href: "/accounts/login" },
+                    self: { href: "/accounts/change-password" },
+                    next: { href: "/accounts/change-password-link" },
                     prev: { href: "/accounts/login" }
                 }
             });
         }
-
-        // token generator
-        const payload = { email: sanitizeEmail(loginCredentials.email), sub: user.id };
-        const jwtToken = {
-            "acessToken": this.jwtService.sign(payload)
-        };
-
-        return jwtToken;
     }
 
     // Password hash
