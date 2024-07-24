@@ -8,6 +8,7 @@ import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
 import * as crypto from 'crypto';
 import { EmailService } from './accounts.email';
 import { logsGenerator } from './accounts.logs';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
@@ -19,8 +20,40 @@ export class UserService {
 
         @InjectRepository(CodeAccountActivate)
         private readonly userAccCodeActivate: Repository<CodeAccountActivate>,
+
         private readonly emailService: EmailService,
+        private readonly jwtService: JwtService,
     ) {}
+
+
+
+
+     // #####
+    async validateUser(email: string, password: string): Promise<UserEntity> {
+        const user = await this.userRepository.findOne({ where: { email } });
+
+        if (user && await this.validateUserPassword(password, user.password)) {
+            return user;
+        }
+        return null;
+    }
+
+    async login(user: UserEntity): Promise<{ accessToken: string }> {
+        const payload = { email: user.email, sub: user.id };
+        return {
+            accessToken: this.jwtService.sign(payload),
+        };
+    }
+
+
+
+
+
+
+
+
+
+
 
     // insert new user
     async createUser(userDto: UserEntityDTO): Promise<any> {
@@ -390,6 +423,25 @@ export class UserService {
             return bcrypt.hash(password, saltRounds);
         } catch (error) {
             logsGenerator('error', `bcrypt error [hashPassword()]: ${error}`)
+        }
+    }
+
+
+    // validae user password // #####
+    private async validateUserPassword(password: string, hash: string): Promise<boolean> {
+        try {
+            return await bcrypt.compare(password, hash);
+        } catch (error) {
+            logsGenerator('error', `Error validating user password [validateUserPassword()]: ${error}`);
+            throw new BadRequestException({
+                statusCode: 400,
+                message: `Error validating user`,
+                _links: {
+                    self: { href: "/accounts/login" },
+                    next: { href: "/accounts/login" },
+                    prev: { href: "/accounts/login" }
+                }
+            });
         }
     }
 

@@ -1,5 +1,5 @@
-import { Controller, Post, Body, ValidationPipe, UseGuards } from '@nestjs/common';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO } from './accounts.dto';
+import { Controller, Post, Body, ValidationPipe, UseGuards, BadRequestException } from '@nestjs/common';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO } from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -40,5 +40,15 @@ export class UserController {
     @Post('change-password')
     async changePassword(@Body(new ValidationPipe({ transform: true })) changePasswordDTO: changePasswordDTO): Promise<any> { 
         return await this.userService.changePassword(changePasswordDTO);
+    }
+
+    @ApiQuery({ type: LoginDTO})
+    @Post('login')
+    async login(@Body() loginDto: LoginDTO) {
+        const user = await this.userService.validateUser(loginDto.email, loginDto.password);
+        if (!user) {
+            throw new BadRequestException('Invalid credentials');
+        }
+        return this.userService.login(user);
     }
 }

@@ -1,5 +1,3 @@
-// user.dto.ts
-
 import { IsNotEmpty, IsBoolean, IsInt, IsString, IsEmail, Length, IsOptional, Matches, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -181,4 +179,21 @@ export class changePasswordDTO {
     @IsString()
     @Length(1, 255)
     urlRedirect: string;
+}
+
+export class LoginDTO {
+
+    @ApiProperty({ 
+        example: 'robertfolk@gmail.com', 
+    })
+    @IsEmail({}, { message: 'Please enter a valid email address' })
+    email: string;
+
+    @ApiProperty({ 
+        example: '$2b$10$hi5p9zPdA2z7qGy4QZPmeWudZdVnBB2cq', 
+    })
+    @IsNotEmpty()
+    @IsString()
+    @Length(1, 255)
+    password: string;
 }
