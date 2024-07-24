@@ -29,6 +29,7 @@ export class UserService {
 
 
      // #####
+     // -------------------------------------------------------------------------------------
     async validateUser(email: string, password: string): Promise<UserEntity> {
         const user = await this.userRepository.findOne({ where: { email } });
 
@@ -44,6 +45,7 @@ export class UserService {
             accessToken: this.jwtService.sign(payload),
         };
     }
+    // -------------------------------------------------------------------------------------
 
 
 
@@ -427,7 +429,9 @@ export class UserService {
     }
 
 
-    // validae user password // #####
+    // #####
+    // validae user password //
+    // -------------------------------------------------------------------------------------
     private async validateUserPassword(password: string, hash: string): Promise<boolean> {
         try {
             return await bcrypt.compare(password, hash);
@@ -444,6 +448,12 @@ export class UserService {
             });
         }
     }
+    // -------------------------------------------------------------------------------------
+
+
+
+
+    
 
     // Send code verify-email
     private async sendEmailVerify(link: string, email: string, textSend: string): Promise<string> {
