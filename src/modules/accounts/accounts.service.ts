@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO } from './accounts.dto';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO } from './accounts.dto';
 import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
@@ -25,58 +25,26 @@ export class UserService {
         private readonly jwtService: JwtService,
     ) {}
 
-
-
-
-     // #####
-     // -------------------------------------------------------------------------------------
-    async validateUser(email: string, password: string): Promise<UserEntity> {
-        const user = await this.userRepository.findOne({ where: { email } });
-
-        if (user && await this.validateUserPassword(password, user.password)) {
-            return user;
-        }
-        return null;
-    }
-
-    async login(user: UserEntity): Promise<{ accessToken: string }> {
-        const payload = { email: user.email, sub: user.id };
-        return {
-            accessToken: this.jwtService.sign(payload),
-        };
-    }
-    // -------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
     // insert new user
     async createUser(userDto: UserEntityDTO): Promise<any> {
 
-        // get user data
-        const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(userDto.email) } });
-
-        // existing email verification
-        if (existingUser) {
-            throw new ConflictException({
-                statusCode: 409,
-                message: `email already registered`,
-                _links: {
-                    self: { href: "/accounts/signup" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
-        }
-
         try {
+
+            // get user data
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(userDto.email) } });
+
+            // existing email verification
+            if (existingUser) {
+                throw new ConflictException({
+                    statusCode: 409,
+                    message: `email already registered`,
+                    _links: {
+                        self: { href: "/accounts/signup" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
             
             // insert data user
             const newUser = new UserEntity();
@@ -418,6 +386,34 @@ export class UserService {
         }
     }
 
+    // login #####
+    async login(loginCredentials: LoginDTO): Promise<any> {
+
+        // get user data
+        const user = await this.userRepository.findOne({ where: { email: sanitizeEmail(loginCredentials.email) } });
+
+        // verify credentials
+        if (!user || !await bcrypt.compare(loginCredentials.password, user.password)) {
+            throw new BadRequestException({
+                statusCode: 401,
+                message: `invalid credentials`,
+                _links: {
+                    self: { href: "/accounts/login" },
+                    next: { href: "/accounts/login" },
+                    prev: { href: "/accounts/login" }
+                }
+            });
+        }
+
+        // token generator
+        const payload = { email: sanitizeEmail(loginCredentials.email), sub: user.id };
+        const jwtToken = {
+            "acessToken": this.jwtService.sign(payload)
+        };
+
+        return jwtToken;
+    }
+
     // Password hash
     private async hashPassword(password: string): Promise<string> {
         try {
@@ -426,34 +422,7 @@ export class UserService {
         } catch (error) {
             logsGenerator('error', `bcrypt error [hashPassword()]: ${error}`)
         }
-    }
-
-
-    // #####
-    // validae user password //
-    // -------------------------------------------------------------------------------------
-    private async validateUserPassword(password: string, hash: string): Promise<boolean> {
-        try {
-            return await bcrypt.compare(password, hash);
-        } catch (error) {
-            logsGenerator('error', `Error validating user password [validateUserPassword()]: ${error}`);
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `Error validating user`,
-                _links: {
-                    self: { href: "/accounts/login" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
-        }
-    }
-    // -------------------------------------------------------------------------------------
-
-
-
-
-    
+    }    
 
     // Send code verify-email
     private async sendEmailVerify(link: string, email: string, textSend: string): Promise<string> {

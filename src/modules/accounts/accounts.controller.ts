@@ -14,41 +14,37 @@ export class UserController {
 
     @ApiQuery({ type: UserEntityDTO})
     @Post('signup')
-    async createUser(@Body(new ValidationPipe({ transform: true })) createUserDto: UserEntityDTO): Promise<any> {
+    async createUser(@Body(new ValidationPipe({ transform: true })) createUserDto: UserEntityDTO) {
         return await this.userService.createUser(createUserDto);
     }
 
     @ApiQuery({ type: resendUserDTO})
     @Post('resend-verify-email')
-    async resendVerifyEmailCode(@Body(new ValidationPipe({ transform: true })) resendEmailDto: resendUserDTO): Promise<any> {
+    async resendVerifyEmailCode(@Body(new ValidationPipe({ transform: true })) resendEmailDto: resendUserDTO) {
         return await this.userService.resendVerifyEmailCode(resendEmailDto);
     }
   
     @ApiQuery({ type: CodeAccountActivateDTO})
     @Post('verify-email')
-    async verifyEmailCode (@Body(new ValidationPipe({ transform: true })) activateDTO: CodeAccountActivateDTO): Promise<any> { 
+    async verifyEmailCode (@Body(new ValidationPipe({ transform: true })) activateDTO: CodeAccountActivateDTO) { 
         return await this.userService.verifyEmailCode(activateDTO);
     }
 
     @ApiQuery({ type: changePasswordLinkDTO})
     @Post('change-password-link')
-    async changePasswordLink(@Body(new ValidationPipe({ transform: true })) changePasswordLinkDTO: changePasswordLinkDTO): Promise<any> { 
+    async changePasswordLink(@Body(new ValidationPipe({ transform: true })) changePasswordLinkDTO: changePasswordLinkDTO) { 
         return await this.userService.changePasswordLink(changePasswordLinkDTO);
     }
 
     @ApiQuery({ type: changePasswordDTO})
     @Post('change-password')
-    async changePassword(@Body(new ValidationPipe({ transform: true })) changePasswordDTO: changePasswordDTO): Promise<any> { 
+    async changePassword(@Body(new ValidationPipe({ transform: true })) changePasswordDTO: changePasswordDTO) { 
         return await this.userService.changePassword(changePasswordDTO);
     }
 
     @ApiQuery({ type: LoginDTO})
     @Post('login')
-    async login(@Body() loginDto: LoginDTO) {
-        const user = await this.userService.validateUser(loginDto.email, loginDto.password);
-        if (!user) {
-            throw new BadRequestException('Invalid credentials');
-        }
-        return this.userService.login(user);
+    async login(@Body(new ValidationPipe({ transform: true })) loginDto: LoginDTO) {
+        return this.userService.login(loginDto);
     }
 }
