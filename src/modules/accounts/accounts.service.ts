@@ -86,6 +86,7 @@ export class UserService {
                     prev: { href: "/accounts/login" }
                 }
             };
+
         } catch (error) {
             logsGenerator('error', `create user service [createUser()]: ${error}`)
             throw new BadRequestException({
@@ -104,6 +105,7 @@ export class UserService {
     async resendVerifyEmailCode(resendActivateDTO: resendUserDTO): Promise<any> {
 
         try {
+
             // get user data
             const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(resendActivateDTO.email) } });
 
@@ -176,7 +178,9 @@ export class UserService {
 
     // Verify email
     async verifyEmailCode(accActivateDTO: CodeAccountActivateDTO): Promise<any> {
+
         try {
+
             const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(accActivateDTO.email), code: accActivateDTO.code}});
 
             if (CodeAccActivate) {
@@ -230,7 +234,9 @@ export class UserService {
 
     // Change password Link
     async changePasswordLink(changePasswordLinkDTO: changePasswordLinkDTO): Promise<any> {
+
         try {
+
             // get user data
             const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordLinkDTO.email) } });
             
@@ -304,7 +310,9 @@ export class UserService {
 
     // change password
     async changePassword(changePasswordDTO: changePasswordDTO): Promise<any> {
+
         try {
+
             // get user data
             const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email) } });
             const CodeAccChange = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email), code: changePasswordDTO.code}});
@@ -372,6 +380,7 @@ export class UserService {
                     prev: { href: "/accounts/login" }
                 }
             };
+
         } catch (error) {
             logsGenerator('error', `create user service [createUser()]: ${error}`)
             throw new BadRequestException({
@@ -428,6 +437,7 @@ export class UserService {
     private async sendEmailVerify(link: string, email: string, textSend: string): Promise<string> {
 
         try {
+
             const hashString = `${Date.now()*100}${email}${process.env.API_SECURITY_CODE}`;
             const codeAccount = crypto.createHash('sha256').update(hashString).digest('hex');
 
@@ -443,6 +453,7 @@ export class UserService {
             await this.emailService.sendTextEmail(to, subject, text);
 
             return codeAccount
+
         } catch (error) {
             logsGenerator('error', `code delivery service via email [sendEmailVerify()]: ${error}`)
             throw new BadRequestException({
