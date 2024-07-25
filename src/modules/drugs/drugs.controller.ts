@@ -10,8 +10,9 @@ export class drugController {
 
     constructor (private readonly drugServices: drugServices) {}
 
-    @ApiQuery({ type: createDTO})
+    @UseGuards(AuthGuard('jwt'))
     @Post('insert')
+    @ApiQuery({ type: createDTO})
     createDrug(@Body(new ValidationPipe({ transform: true })) body: createDTO) {
       return this.drugServices.createDrug(body);
     }
@@ -23,12 +24,14 @@ export class drugController {
         return this.drugServices.readDrug();
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Put('update')
     @ApiQuery({ type: updateDTO})
     updateDrug(@Body(new ValidationPipe({ transform: true })) body: updateDTO) {
         return this.drugServices.updateDrug(body);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Delete('delete')
     @ApiQuery({ type: deleteDTO})
     deleteDrug(@Body(new ValidationPipe({ transform: true })) body: deleteDTO) {
