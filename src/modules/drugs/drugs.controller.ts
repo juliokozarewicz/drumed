@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, BadGatewayException, ValidationPipe, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, BadGatewayException, ValidationPipe, Put, Delete, UseGuards } from '@nestjs/common';
 import { drugServices } from './drugs.service';
 import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('DRUGS')
 @Controller('api')
@@ -15,6 +16,7 @@ export class drugController {
       return this.drugServices.createDrug(body);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get('read')
     @ApiQuery({ type: readDTO})
     readDrug() {

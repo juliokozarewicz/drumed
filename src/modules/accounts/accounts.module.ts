@@ -6,6 +6,7 @@ import { UserService } from './accounts.service';
 import { EmailService } from './accounts.email';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './accounts.jwt_strategy';
 
 
 @Module({
@@ -18,12 +19,12 @@ import { PassportModule } from '@nestjs/passport';
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
             secret: String(process.env.API_SECURITY_CODE),
-            signOptions: { expiresIn: '1m' },
+            signOptions: { expiresIn: '1h' },
         }),
 
     ],
     controllers: [UserController],
-    providers: [UserService, EmailService],
+    providers: [JwtStrategy, UserService, EmailService],
     exports: [UserService],
 })
 export class AccountsModule {}
