@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO } from './accounts.dto';
@@ -208,8 +208,8 @@ export class UserService {
                 };
             } else {
                 logsGenerator('error', `invalid email verification code [verifyEmailCode()]`)
-                throw new BadRequestException({
-                    statusCode: 404,
+                throw new UnauthorizedException({
+                    statusCode: 401,
                     message: `invalid email verification code`,
                     _links: {
                         self: { href: "/accounts/verify-email" },
@@ -220,8 +220,8 @@ export class UserService {
             }
 
         } catch (error) {
-            throw new BadRequestException({
-                statusCode: 404,
+            throw new UnauthorizedException({
+                statusCode: 401,
                 message: `error with activation code`,
                 _links: {
                     self: { href: "/accounts/verify-email" },
@@ -243,7 +243,7 @@ export class UserService {
             // existing email verification
             if (!existingUser) {
                 throw new BadRequestException({
-                    statusCode: 409,
+                    statusCode: 404,
                     message: `email not registered`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
@@ -255,8 +255,8 @@ export class UserService {
 
             // email not activated
             if (existingUser.isEmailConfirmed === false) {
-                throw new BadRequestException({
-                    statusCode: 404,
+                throw new UnauthorizedException({
+                    statusCode: 401,
                     message: `email not activated`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
@@ -319,8 +319,8 @@ export class UserService {
 
             // existing email verification
             if (!existingUser) {
-                throw new BadRequestException({
-                    statusCode: 404,
+                throw new UnauthorizedException({
+                    statusCode: 401,
                     message: `email not registered`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
@@ -332,8 +332,8 @@ export class UserService {
 
             // email not activated
             if (existingUser.isEmailConfirmed === false) {
-                throw new BadRequestException({
-                    statusCode: 404,
+                throw new UnauthorizedException({
+                    statusCode: 401,
                     message: `email not activated`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
@@ -360,8 +360,8 @@ export class UserService {
                 });
             } else {
                 logsGenerator('error', `invalid password verification code [changePassword()]`)
-                throw new BadRequestException({
-                    statusCode: 404,
+                throw new UnauthorizedException({
+                    statusCode: 401,
                     message: `invalid password verification code`,
                     _links: {
                         self: { href: "/accounts/change-password" },
@@ -405,7 +405,7 @@ export class UserService {
 
             // verify credentials
             if (!user || !await bcrypt.compare(loginCredentials.password, user.password)) {
-                throw new BadRequestException({
+                throw new UnauthorizedException({
                     statusCode: 401,
                     message: `invalid credentials`,
                     _links: {
@@ -418,8 +418,8 @@ export class UserService {
 
             // Email not activated
             if (!user.isEmailConfirmed) {
-                throw new BadRequestException({
-                    statusCode: 404,
+                throw new UnauthorizedException({
+                    statusCode: 401,
                     message: `email not activated`,
                     _links: {
                         self: { href: "/accounts/login" },
@@ -431,8 +431,8 @@ export class UserService {
 
             // Account not activated (deleted or banned)
             if (!user.isActive) {
-                throw new BadRequestException({
-                    statusCode: 404,
+                throw new UnauthorizedException({
+                    statusCode: 401,
                     message: `Account not activated`,
                     _links: {
                         self: { href: "/accounts/login" },
