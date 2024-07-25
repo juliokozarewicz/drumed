@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO } from './accounts.dto';
@@ -91,7 +91,7 @@ export class UserService {
             logsGenerator('error', `create user service [createUser()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 400,
-                message: `an error occurred: ${error}`,
+                message: `${error}`,
                 _links: {
                     self: { href: "/accounts/signup" },
                     next: { href: "/accounts/signup" },
@@ -112,7 +112,7 @@ export class UserService {
             // existing email verification
             if (!existingUser) {
                 throw new BadRequestException({
-                    statusCode: 409,
+                    statusCode: 404,
                     message: `email not registered`,
                     _links: {
                         self: { href: "/accounts/resend-verify-email" },
@@ -124,7 +124,7 @@ export class UserService {
 
             // activated email
             if (existingUser.isEmailConfirmed) {
-                throw new BadRequestException({
+                throw new ConflictException({
                     statusCode: 409,
                     message: `account with email activated`,
                     _links: {
@@ -166,7 +166,7 @@ export class UserService {
             logsGenerator('error', `error when resending the email link [resendVerifyEmailCode()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 400,
-                message: `error when resending the email link: (${error})`,
+                message: `${error}`,
                 _links: {
                     self: { href: "/accounts/resend-verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
@@ -209,7 +209,7 @@ export class UserService {
             } else {
                 logsGenerator('error', `invalid email verification code [verifyEmailCode()]`)
                 throw new BadRequestException({
-                    statusCode: 400,
+                    statusCode: 404,
                     message: `invalid email verification code`,
                     _links: {
                         self: { href: "/accounts/verify-email" },
@@ -221,7 +221,7 @@ export class UserService {
 
         } catch (error) {
             throw new BadRequestException({
-                statusCode: 400,
+                statusCode: 404,
                 message: `error with activation code`,
                 _links: {
                     self: { href: "/accounts/verify-email" },
@@ -256,7 +256,7 @@ export class UserService {
             // email not activated
             if (existingUser.isEmailConfirmed === false) {
                 throw new BadRequestException({
-                    statusCode: 409,
+                    statusCode: 404,
                     message: `email not activated`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
@@ -298,7 +298,7 @@ export class UserService {
             logsGenerator('error', `error sending password change link [changePasswordLink()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 400,
-                message: `error sending password change link: (${error})`,
+                message: `${error}`,
                 _links: {
                     self: { href: "/accounts/change-password-link" },
                     next: { href: "/accounts/change-password-link" },
@@ -320,7 +320,7 @@ export class UserService {
             // existing email verification
             if (!existingUser) {
                 throw new BadRequestException({
-                    statusCode: 409,
+                    statusCode: 404,
                     message: `email not registered`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
@@ -333,7 +333,7 @@ export class UserService {
             // email not activated
             if (existingUser.isEmailConfirmed === false) {
                 throw new BadRequestException({
-                    statusCode: 409,
+                    statusCode: 404,
                     message: `email not activated`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
@@ -361,7 +361,7 @@ export class UserService {
             } else {
                 logsGenerator('error', `invalid password verification code [changePassword()]`)
                 throw new BadRequestException({
-                    statusCode: 400,
+                    statusCode: 404,
                     message: `invalid password verification code`,
                     _links: {
                         self: { href: "/accounts/change-password" },
@@ -385,7 +385,7 @@ export class UserService {
             logsGenerator('error', `create user service [createUser()]: ${error}`)
             throw new BadRequestException({
                 statusCode: 400,
-                message: `an error occurred: ${error}`,
+                message: `${error}`,
                 _links: {
                     self: { href: "/accounts/change-password" },
                     next: { href: "/accounts/change-password-link" },
@@ -416,6 +416,32 @@ export class UserService {
                 });
             }
 
+            // Email not activated
+            if (!user.isEmailConfirmed) {
+                throw new BadRequestException({
+                    statusCode: 404,
+                    message: `email not activated`,
+                    _links: {
+                        self: { href: "/accounts/login" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // Account not activated (deleted or banned)
+            if (!user.isActive) {
+                throw new BadRequestException({
+                    statusCode: 404,
+                    message: `Account not activated`,
+                    _links: {
+                        self: { href: "/accounts/login" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
             // token generator
             const payload = { email: sanitizeEmail(loginCredentials.email), sub: user.id };
             const jwtToken = {
@@ -427,8 +453,8 @@ export class UserService {
         } catch (error) {
             logsGenerator('error', `login user service [login()]: ${error}`)
             throw new BadRequestException({
-                statusCode: 401,
-                message: `an error occurred: ${error}`,
+                statusCode: 400,
+                message: `${error}`,
                 _links: {
                     self: { href: "/accounts/change-password" },
                     next: { href: "/accounts/change-password-link" },
@@ -470,10 +496,10 @@ export class UserService {
             return codeAccount
 
         } catch (error) {
-            logsGenerator('error', `code delivery service via email [sendEmailVerify()]: ${error}`)
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `code delivery service via email`,
+            logsGenerator('error', `error with code delivery service via email [sendEmailVerify()]: ${error}`)
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: `error with code delivery service via email`,
                 _links: {
                     self: { href: "/accounts/verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
