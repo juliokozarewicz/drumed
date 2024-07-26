@@ -33,7 +33,7 @@ export class UserController {
     async resendVerifyEmailCode(@Body(new ValidationPipe({ transform: true })) resendEmailDto: resendUserDTO) {
         return await this.userService.resendVerifyEmailCode(resendEmailDto);
     }
-  
+
     @Post('verify-email')
     @ApiBody({ type: CodeAccountActivateDTO})
     @ApiOperation({

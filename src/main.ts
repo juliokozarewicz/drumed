@@ -13,6 +13,7 @@ async function bootstrap() {
     .setTitle('Drumed Medicine')
     .setDescription('System management API for pharmacy drug database using NestJS.')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
