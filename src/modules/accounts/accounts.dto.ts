@@ -11,7 +11,7 @@ export class UserEntityDTO {
     level: boolean;
 
     @ApiProperty({ 
-        example: 'Robert Folk', 
+        example: 'Robert Folk',
     })
     @IsString()
     @IsNotEmpty()
