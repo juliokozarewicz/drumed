@@ -25,6 +25,13 @@ export class UserService {
         private readonly jwtService: JwtService,
     ) {}
 
+    // exception handling
+    private readonly knownExceptions = [
+        ConflictException,
+        BadRequestException,
+        UnauthorizedException
+    ];
+
     // insert new user
     async createUser(userDto: UserEntityDTO): Promise<any> {
 
@@ -88,10 +95,18 @@ export class UserService {
             };
 
         } catch (error) {
+
+            // logs
             logsGenerator('error', `create user service [createUser()]: ${error}`)
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `${error}`,
+
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'An unexpected error occurred. Please try again later.',
                 _links: {
                     self: { href: "/accounts/signup" },
                     next: { href: "/accounts/signup" },
@@ -163,10 +178,18 @@ export class UserService {
             };
 
         } catch (error) {
+
+            // logs
             logsGenerator('error', `error when resending the email link [resendVerifyEmailCode()]: ${error}`)
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `${error}`,
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'An unexpected error occurred. Please try again later.',
                 _links: {
                     self: { href: "/accounts/resend-verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
@@ -207,7 +230,6 @@ export class UserService {
                     }
                 };
             } else {
-                logsGenerator('error', `invalid email verification code [verifyEmailCode()]`)
                 throw new UnauthorizedException({
                     statusCode: 401,
                     message: `invalid email verification code`,
@@ -220,9 +242,18 @@ export class UserService {
             }
 
         } catch (error) {
-            throw new UnauthorizedException({
-                statusCode: 401,
-                message: `error with activation code`,
+
+            // logs
+            logsGenerator('error', `error with verify email code [verifyEmailCode()]: ${error}`)
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'An unexpected error occurred. Please try again later.',
                 _links: {
                     self: { href: "/accounts/verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
@@ -295,10 +326,18 @@ export class UserService {
             };
 
         } catch (error) {
+
+            // logs
             logsGenerator('error', `error sending password change link [changePasswordLink()]: ${error}`)
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `${error}`,
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'An unexpected error occurred. Please try again later.',
                 _links: {
                     self: { href: "/accounts/change-password-link" },
                     next: { href: "/accounts/change-password-link" },
@@ -359,7 +398,6 @@ export class UserService {
                     await transactionalEntityManager.save(changePasswordDB);
                 });
             } else {
-                logsGenerator('error', `invalid password verification code [changePassword()]`)
                 throw new UnauthorizedException({
                     statusCode: 401,
                     message: `invalid password verification code`,
@@ -382,10 +420,18 @@ export class UserService {
             };
 
         } catch (error) {
-            logsGenerator('error', `create user service [createUser()]: ${error}`)
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `${error}`,
+
+            // logs
+            logsGenerator('error', `invalid password verification code [changePassword()]`)
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'An unexpected error occurred. Please try again later.',
                 _links: {
                     self: { href: "/accounts/change-password" },
                     next: { href: "/accounts/change-password-link" },
@@ -451,13 +497,21 @@ export class UserService {
             return jwtToken;
 
         } catch (error) {
+
+            // logs
             logsGenerator('error', `login user service [login()]: ${error}`)
-            throw new BadRequestException({
-                statusCode: 400,
-                message: `${error}`,
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'An unexpected error occurred. Please try again later.',
                 _links: {
-                    self: { href: "/accounts/change-password" },
-                    next: { href: "/accounts/change-password-link" },
+                    self: { href: "/accounts/login" },
+                    next: { href: "/accounts/login" },
                     prev: { href: "/accounts/login" }
                 }
             });
@@ -496,10 +550,18 @@ export class UserService {
             return codeAccount
 
         } catch (error) {
+
+            // logs
             logsGenerator('error', `error with code delivery service via email [sendEmailVerify()]: ${error}`)
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,
-                message: `error with code delivery service via email`,
+                message: 'An unexpected error occurred. Please try again later.',
                 _links: {
                     self: { href: "/accounts/verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
