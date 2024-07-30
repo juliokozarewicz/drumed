@@ -562,15 +562,22 @@ export class UserService {
             // get profile user data
             const profile = await this.profileRepository.findOne({ where: { id: sanitizeUserId(userData.userId) } });
 
-            // change password
+            // update profile
             profile.id = userData.userId;
             profile.biography = profileDTO.biography;
             profile.cpf = profileDTO.cpf;
             profile.phone = profileDTO.phone;
-            
             this.profileRepository.save(profile)
 
-            return profile;
+            return {
+                statusCode: 201,
+                message: "profile changed successfully",
+                _links: {
+                    self: { href: `/accounts/profile-update` },
+                    next: { href: "/accounts/profile" },
+                    prev: { href: "/accounts/profile" }
+                }
+            };
 
         } catch (error) {
 
