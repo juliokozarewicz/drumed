@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO, ProfileDTO } from './accounts.dto';
 import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
-import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
+import { sanitizeNameString, sanitizeEmail, sanitizeUserId, sanitizeString } from './accounts.sanitize';
 import * as crypto from 'crypto';
 import { EmailService } from './accounts.email';
 import { logsGenerator } from './accounts.logs';
@@ -17,6 +17,9 @@ export class UserService {
     constructor(
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
+
+        @InjectRepository(Profile)
+        private readonly profileRepository: Repository<Profile>,
 
         @InjectRepository(CodeAccountActivate)
         private readonly userAccCodeActivate: Repository<CodeAccountActivate>,
@@ -204,7 +207,7 @@ export class UserService {
 
         try {
 
-            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(accActivateDTO.email), code: accActivateDTO.code}});
+            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(accActivateDTO.email), code: sanitizeString(accActivateDTO.code) }});
 
             if (CodeAccActivate) {
 
@@ -354,7 +357,7 @@ export class UserService {
 
             // get user data
             const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email) } });
-            const CodeAccChange = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email), code: changePasswordDTO.code}});
+            const CodeAccChange = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email), code: sanitizeString(changePasswordDTO.code) }});
 
             // existing email verification
             if (!existingUser) {
@@ -518,12 +521,15 @@ export class UserService {
         }
     }
 
-    // profile
-    async profile(): Promise<any> {
+    // get profile data
+    async profile(userData: any): Promise<any> {
 
         try {
 
-            console.log('*** PROFILE ***')
+            // get profile user data
+            const profile = await this.profileRepository.findOne({ where: { id: sanitizeUserId(userData.userId) } });
+
+            return profile;
 
         } catch (error) {
 

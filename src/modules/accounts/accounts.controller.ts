@@ -1,4 +1,4 @@
-import { Controller, Post, Body, ValidationPipe, UseGuards, Put, Get } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, UseGuards, Put, Get, Req } from '@nestjs/common';
 import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO, ProfileDTO } from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -80,7 +80,10 @@ export class UserController {
         summary: 'Get Profile Data',
         description: 'Method to obtain user profile data, such as biography, identity, and other details.'
       })
-    profile() {
-        return this.userService.profile();
+    profile(@Req() req: any) {
+
+        const userData = req.user;
+
+        return this.userService.profile(userData);
     }
 }
