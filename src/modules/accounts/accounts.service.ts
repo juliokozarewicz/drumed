@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO } from './accounts.dto';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO, ProfileDTO } from './accounts.dto';
 import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail } from './accounts.sanitize';
@@ -518,6 +518,36 @@ export class UserService {
         }
     }
 
+    // profile
+    async profile(): Promise<any> {
+
+        try {
+
+            console.log('*** PROFILE ***')
+
+        } catch (error) {
+
+            // logs
+            logsGenerator('error', `profile user service [profile()]: ${error}`)
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'An unexpected error occurred. Please try again later.',
+                _links: {
+                    self: { href: "/accounts/login" },
+                    next: { href: "/accounts/login" },
+                    prev: { href: "/accounts/login" }
+                }
+            });
+        }
+
+    }
+
     // Password hash
     private async hashPassword(password: string): Promise<string> {
         try {
@@ -553,11 +583,11 @@ export class UserService {
 
             // logs
             logsGenerator('error', `error with code delivery service via email [sendEmailVerify()]: ${error}`)
-        
+
             if (this.knownExceptions.some(exc => error instanceof exc)) {
                 throw error;
             }
-        
+
             // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,

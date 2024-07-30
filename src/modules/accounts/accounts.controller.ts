@@ -1,8 +1,9 @@
-import { Controller, Post, Body, ValidationPipe, UseGuards, BadRequestException } from '@nestjs/common';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO } from './accounts.dto';
+import { Controller, Post, Body, ValidationPipe, UseGuards, Put, Get } from '@nestjs/common';
+import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO, ProfileDTO } from './accounts.dto';
 import { UserService } from './accounts.service';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('ACCOUNTS')
 @Controller('accounts')
@@ -18,8 +19,6 @@ export class UserController {
         summary: 'Create a new user',
         description: 'Registers a new user in the system with the provided details.'
     })
-    @ApiResponse({ status: 201, description: 'User successfully created.' })
-    @ApiResponse({ status: 400, description: 'Invalid input.' })
     async createUser(@Body(new ValidationPipe({ transform: true })) createUserDto: UserEntityDTO): Promise<any> {
         return await this.userService.createUser(createUserDto);
     }
@@ -54,7 +53,7 @@ export class UserController {
         return await this.userService.changePasswordLink(changePasswordLinkDTO);
     }
 
-    @Post('change-password')
+    @Put('change-password')
     @ApiBody({ type: changePasswordDTO})
     @ApiOperation({
         summary: 'Change User Password',
@@ -72,5 +71,16 @@ export class UserController {
       })
     async login(@Body(new ValidationPipe({ transform: true })) loginDto: LoginDTO) {
         return this.userService.login(loginDto);
+    }
+
+    @Get('profile')
+    @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Get Profile Data',
+        description: 'Method to obtain user profile data, such as biography, identity, and other details.'
+      })
+    profile() {
+        return this.userService.profile();
     }
 }
