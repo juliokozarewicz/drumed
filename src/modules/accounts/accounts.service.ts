@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, InternalServerError
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO, ProfileDTO } from './accounts.dto';
-import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
+import { ProfileEntity, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail, sanitizeUserId, sanitizeString } from './accounts.sanitize';
 import * as crypto from 'crypto';
@@ -18,8 +18,8 @@ export class UserService {
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
 
-        @InjectRepository(Profile)
-        private readonly profileRepository: Repository<Profile>,
+        @InjectRepository(ProfileEntity)
+        private readonly profileRepository: Repository<ProfileEntity>,
 
         @InjectRepository(CodeAccountActivate)
         private readonly userAccCodeActivate: Repository<CodeAccountActivate>,
@@ -71,7 +71,7 @@ export class UserService {
                 const savedUser = await transactionalEntityManager.save(newUser);
 
                 // commit new profile
-                const newProfile = new Profile();
+                const newProfile = new ProfileEntity();
                 newProfile.id = savedUser.id;
                 await transactionalEntityManager.save(newProfile);
 
@@ -109,7 +109,7 @@ export class UserService {
             // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,
-                message: 'An unexpected error occurred. Please try again later.',
+                message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/signup" },
                     next: { href: "/accounts/signup" },
@@ -192,7 +192,7 @@ export class UserService {
             // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,
-                message: 'An unexpected error occurred. Please try again later.',
+                message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/resend-verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
@@ -256,7 +256,7 @@ export class UserService {
             // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,
-                message: 'An unexpected error occurred. Please try again later.',
+                message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/verify-email" },
                     next: { href: "/accounts/resend-verify-email" },
@@ -340,7 +340,7 @@ export class UserService {
             // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,
-                message: 'An unexpected error occurred. Please try again later.',
+                message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/change-password-link" },
                     next: { href: "/accounts/change-password-link" },
@@ -434,7 +434,7 @@ export class UserService {
             // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,
-                message: 'An unexpected error occurred. Please try again later.',
+                message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/change-password" },
                     next: { href: "/accounts/change-password-link" },
@@ -511,7 +511,7 @@ export class UserService {
             // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,
-                message: 'An unexpected error occurred. Please try again later.',
+                message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/login" },
                     next: { href: "/accounts/login" },
@@ -543,7 +543,48 @@ export class UserService {
             // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,
-                message: 'An unexpected error occurred. Please try again later.',
+                message: 'an unexpected error occurred, please try again later',
+                _links: {
+                    self: { href: "/accounts/login" },
+                    next: { href: "/accounts/login" },
+                    prev: { href: "/accounts/login" }
+                }
+            });
+        }
+
+    }
+
+    // update profile data
+    async updateProfile(userData: any, profileDTO: any): Promise<any> {
+
+        try {
+
+            // get profile user data
+            const profile = await this.profileRepository.findOne({ where: { id: sanitizeUserId(userData.userId) } });
+
+            // change password
+            profile.id = userData.userId;
+            profile.biography = profileDTO.biography;
+            profile.cpf = profileDTO.cpf;
+            profile.phone = profileDTO.phone;
+            
+            this.profileRepository.save(profile)
+
+            return profile;
+
+        } catch (error) {
+
+            // logs
+            logsGenerator('error', `profile user service [updateProfile()]: ${error}`)
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/login" },
                     next: { href: "/accounts/login" },
@@ -597,7 +638,7 @@ export class UserService {
             // return server error
             throw new InternalServerErrorException({
                 statusCode: 500,
-                message: 'An unexpected error occurred. Please try again later.',
+                message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/verify-email" },
                     next: { href: "/accounts/resend-verify-email" },

@@ -86,4 +86,18 @@ export class UserController {
 
         return this.userService.profile(userData);
     }
+
+    @Put('profile-update')
+    @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Update Profile Data',
+        description: 'Method to update user profile data, such as biography, identity, and other details.'
+      })
+      updateProfile(@Req() req: any, @Body(new ValidationPipe({ transform: true })) profileDTO: ProfileDTO) {
+
+        const userData = req.user;
+
+        return this.userService.updateProfile(userData, profileDTO);
+    }
 }

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './accounts.controller';
-import { Profile, UserEntity, CodeAccountActivate } from './accounts.entity';
+import { ProfileEntity, UserEntity, CodeAccountActivate } from './accounts.entity';
 import { UserService } from './accounts.service';
 import { EmailService } from './accounts.email';
 import { JwtModule } from '@nestjs/jwt';
@@ -13,7 +13,7 @@ import { JwtStrategy } from './accounts.jwt_strategy';
     imports: [
 
         // TypeORM (database)
-        TypeOrmModule.forFeature([UserEntity, Profile, CodeAccountActivate]),
+        TypeOrmModule.forFeature([UserEntity, ProfileEntity, CodeAccountActivate]),
 
         // JWT for login
         PassportModule.register({ defaultStrategy: 'jwt' }),
