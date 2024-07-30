@@ -94,10 +94,11 @@ export class UserController {
         summary: 'Update Profile Data',
         description: 'Method to update user profile data, such as biography, identity, and other details.'
       })
-      updateProfile(@Req() req: any, @Body(new ValidationPipe({ transform: true })) profileDTO: ProfileDTO) {
-
+    updateProfile(
+        @Req() req: any,
+        @Body(new ValidationPipe({ transform: true })) profileDTO: ProfileDTO
+    ) {
         const userData = req.user;
-
         return this.userService.updateProfile(userData, profileDTO);
     }
 }
