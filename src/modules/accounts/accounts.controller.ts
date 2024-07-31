@@ -1,5 +1,9 @@
 import { Controller, Post, Body, ValidationPipe, UseGuards, Put, Get, Req } from '@nestjs/common';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO, ProfileDTO } from './accounts.dto';
+import {
+    CodeAccountActivateDTO, resendUserDTO, UserEntityDTO,
+    changePasswordLinkDTO, changePasswordDTO, LoginDTO,
+    ProfileDTO, deletAccountLinkDTO
+} from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -100,5 +104,15 @@ export class UserController {
     ) {
         const userData = req.user;
         return this.userService.updateProfile(userData, profileDTO);
+    }
+
+    @Post('delete-account-link')
+    @ApiBody({ type: deletAccountLinkDTO})
+    @ApiOperation({
+        summary: 'Request Account Deletion Link',
+        description: 'Sends a link to the user’s email that allows them to delete their account.'
+    })
+    async deletAccountLink(@Body(new ValidationPipe({ transform: true })) deletAccountLinkDTO: deletAccountLinkDTO) { 
+        return await this.userService.deletAccountLink(deletAccountLinkDTO);
     }
 }

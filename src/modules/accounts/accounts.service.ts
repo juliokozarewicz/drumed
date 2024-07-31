@@ -1,7 +1,11 @@
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CodeAccountActivateDTO, resendUserDTO, UserEntityDTO, changePasswordLinkDTO, changePasswordDTO, LoginDTO, ProfileDTO } from './accounts.dto';
+import {
+    CodeAccountActivateDTO, resendUserDTO, UserEntityDTO,
+    changePasswordLinkDTO, changePasswordDTO, LoginDTO,
+    ProfileDTO, deletAccountLinkDTO
+} from './accounts.dto';
 import { ProfileEntity, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
 import { sanitizeNameString, sanitizeEmail, sanitizeUserId, sanitizeString } from './accounts.sanitize';
@@ -127,6 +131,19 @@ export class UserService {
             // get user data
             const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(resendActivateDTO.email) } });
 
+            // Account not activated (deleted or banned)
+            if (!existingUser.isActive) {
+                throw new UnauthorizedException({
+                    statusCode: 401,
+                    message: `Account not activated`,
+                    _links: {
+                        self: { href: "/accounts/resend-verify-email" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
             // existing email verification
             if (!existingUser) {
                 throw new BadRequestException({
@@ -220,6 +237,20 @@ export class UserService {
 
                 // Active account
                 const activeAccEnd = await this.userRepository.findOne( { where: { email: sanitizeEmail(accActivateDTO.email) } } );
+
+                // Account not activated (deleted or banned)
+                if (!activeAccEnd.isActive) {
+                    throw new UnauthorizedException({
+                        statusCode: 401,
+                        message: `Account not activated`,
+                        _links: {
+                            self: { href: "/accounts/verify-email" },
+                            next: { href: "/accounts/signup" },
+                            prev: { href: "/accounts/login" }
+                        }
+                    });
+                }
+
                 activeAccEnd.isEmailConfirmed = true;
                 await this.userRepository.save(activeAccEnd);
 
@@ -300,6 +331,19 @@ export class UserService {
                 });
             }
 
+            // Account not activated (deleted or banned)
+            if (!existingUser.isActive) {
+                throw new UnauthorizedException({
+                    statusCode: 401,
+                    message: `Account not activated`,
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
             // delete existing codes
             const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(changePasswordLinkDTO.email) } } );
 
@@ -365,7 +409,7 @@ export class UserService {
                     statusCode: 401,
                     message: `email not registered`,
                     _links: {
-                        self: { href: "/accounts/change-password-link" },
+                        self: { href: "/accounts/change-password" },
                         next: { href: "/accounts/signup" },
                         prev: { href: "/accounts/login" }
                     }
@@ -378,8 +422,21 @@ export class UserService {
                     statusCode: 401,
                     message: `email not activated`,
                     _links: {
-                        self: { href: "/accounts/change-password-link" },
+                        self: { href: "/accounts/change-password" },
                         next: { href: "/accounts/resend-verify-email" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // Account not activated (deleted or banned)
+            if (!existingUser.isActive) {
+                throw new UnauthorizedException({
+                    statusCode: 401,
+                    message: `Account not activated`,
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/signup" },
                         prev: { href: "/accounts/login" }
                     }
                 });
@@ -555,7 +612,7 @@ export class UserService {
     }
 
     // update profile data
-    async updateProfile(userData: any, profileDTO: any): Promise<any> {
+    async updateProfile(userData: any, ProfileDTO: ProfileDTO): Promise<any> {
 
         try {
 
@@ -564,9 +621,9 @@ export class UserService {
 
             // update profile
             profile.id = userData.userId;
-            profile.biography = profileDTO.biography;
-            profile.cpf = profileDTO.cpf;
-            profile.phone = profileDTO.phone;
+            profile.biography = ProfileDTO.biography;
+            profile.cpf = ProfileDTO.cpf;
+            profile.phone = ProfileDTO.phone;
             this.profileRepository.save(profile)
 
             return {
@@ -600,6 +657,103 @@ export class UserService {
             });
         }
 
+    }
+
+    // Change password Link
+    async deletAccountLink(deletAccountLinkDTO: deletAccountLinkDTO): Promise<any> {
+
+        try {
+
+            // get user data
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(deletAccountLinkDTO.email) } });
+            
+            // existing email verification
+            if (!existingUser) {
+                throw new BadRequestException({
+                    statusCode: 404,
+                    message: `email not registered`,
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // email not activated
+            if (existingUser.isEmailConfirmed === false) {
+                throw new UnauthorizedException({
+                    statusCode: 401,
+                    message: `email not activated`,
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/resend-verify-email" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // Account not activated (deleted or banned)
+            if (!existingUser.isActive) {
+                throw new UnauthorizedException({
+                    statusCode: 401,
+                    message: `Account not activated`,
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // delete existing codes
+            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(deletAccountLinkDTO.email) } } );
+
+            for (let i = 0; i < deleteAllCodes.length; i++) {
+                await this.userAccCodeActivate.remove(deleteAllCodes[i]);
+            }
+
+            // save the code in the db and send the link via email
+            await this.userRepository.manager.transaction(async transactionalResendCodeManager => {
+                const textSend = `Click the link in this email to delete your account`;
+                const codeAccount = await this.sendEmailVerify(deletAccountLinkDTO.urlRedirect, sanitizeEmail(deletAccountLinkDTO.email), textSend)
+
+                const codeAccActivate = new CodeAccountActivate();
+                codeAccActivate.code = codeAccount;
+                codeAccActivate.email = sanitizeEmail(deletAccountLinkDTO.email);
+                await transactionalResendCodeManager.save(codeAccActivate);
+            })
+
+            return {
+                statusCode: 201,
+                message: "account deletion link sent successfully",
+                _links: {
+                    self: { href: "/accounts/delete-account-link" },
+                    next: { href: `/accounts/accounts/delete-account`},
+                    prev: { href: "/accounts/login" }
+                }
+            };
+
+        } catch (error) {
+
+            // logs
+            logsGenerator('error', `error sending account deletion link [deletAccountLink()]: ${error}`)
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'an unexpected error occurred, please try again later',
+                _links: {
+                    self: { href: "/accounts/change-password-link" },
+                    next: { href: "/accounts/change-password-link" },
+                    prev: { href: "/accounts/login" }
+                }
+            });
+        }
     }
 
     // Password hash

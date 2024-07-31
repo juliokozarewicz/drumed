@@ -197,3 +197,20 @@ export class LoginDTO {
     @Length(1, 255)
     password: string;
 }
+
+export class deletAccountLinkDTO {
+
+    @ApiProperty({ 
+        example: 'robertfolk@gmail.com', 
+    })
+    @IsEmail({}, { message: 'Please enter a valid email address' })
+    email: string;
+
+    @ApiProperty({ 
+        example: "www.yourlink.com/auth/delete-account",
+    })
+    @IsNotEmpty()
+    @IsString()
+    @Length(1, 255)
+    urlRedirect: string;
+}
