@@ -38,9 +38,9 @@ export class drugEntity {
   @Column({ type: 'boolean', nullable: false })
   restricted: boolean;
 
-  @CreateDateColumn({ type: 'timestamp', nullable: false })
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp', nullable: false })
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 }

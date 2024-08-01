@@ -813,8 +813,9 @@ export class UserService {
                         await this.userAccCodeActivate.remove(deleteAllCodes[i]);
                     }
 
-                    // delete account #####
-                    // logic here
+                    // delete account
+                    existingUser.isActive = false;
+                    await this.userRepository.save(existingUser);
                 });
             } else {
                 throw new UnauthorizedException({
