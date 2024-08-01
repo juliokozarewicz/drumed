@@ -1,8 +1,8 @@
-import { Controller, Post, Body, ValidationPipe, UseGuards, Put, Get, Req } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, UseGuards, Put, Get, Req, Delete } from '@nestjs/common';
 import {
     CodeAccountActivateDTO, resendUserDTO, UserEntityDTO,
     changePasswordLinkDTO, changePasswordDTO, LoginDTO,
-    ProfileDTO, deletAccountLinkDTO
+    ProfileDTO, deletAccountLinkDTO, deletAccountDTO
 } from './accounts.dto';
 import { UserService } from './accounts.service';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -97,7 +97,7 @@ export class UserController {
     @ApiOperation({
         summary: 'Update Profile Data',
         description: 'Method to update user profile data, such as biography, identity, and other details.'
-      })
+    })
     updateProfile(
         @Req() req: any,
         @Body(new ValidationPipe({ transform: true })) profileDTO: ProfileDTO
@@ -114,5 +114,15 @@ export class UserController {
     })
     async deletAccountLink(@Body(new ValidationPipe({ transform: true })) deletAccountLinkDTO: deletAccountLinkDTO) { 
         return await this.userService.deletAccountLink(deletAccountLinkDTO);
+    }
+
+    @Delete('delete-account')
+    @ApiBody({ type: deletAccountDTO})
+    @ApiOperation({
+        summary: 'Delete User Account',
+        description: 'Deletes the user’s account based on the provided information.'
+    })
+    async deletAccount(@Body(new ValidationPipe({ transform: true })) deletAccountDTO: deletAccountDTO) { 
+        return await this.userService.deletAccount(deletAccountDTO);
     }
 }

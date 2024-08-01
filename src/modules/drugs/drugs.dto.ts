@@ -96,8 +96,6 @@ export class createDTO {
     restricted: boolean;
   }
 
-  export class readDTO {}
-
   export class updateDTO {
     
     @ApiProperty({ 

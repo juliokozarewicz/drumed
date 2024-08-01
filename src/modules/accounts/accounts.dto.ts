@@ -214,3 +214,33 @@ export class deletAccountLinkDTO {
     @Length(1, 255)
     urlRedirect: string;
 }
+
+export class deletAccountDTO {
+
+    @ApiProperty({ 
+        example: 'robertfolk@gmail.com', 
+    })
+    @IsEmail({}, { message: 'Please enter a valid email address' })
+    email: string;
+
+    @ApiProperty({ 
+        example: '$2b$10$hi5p9zPdA2z7qGy4QF5OP.xONlFhwBwJr8FMTZPmeWudZdVnBB2cq', 
+    })
+    @IsNotEmpty()
+    @IsString()
+    @Length(1, 255)
+    @Matches(/^(?=.*[A-Z])/, { message: 'Password must contain at least one uppercase letter' })
+    @Matches(/^(?=.*[a-z])/, { message: 'Password must contain at least one lowercase letter' })
+    @Matches(/^(?=.*\d)/, { message: 'Password must contain at least one number' })
+    @Matches(/^(?=.*[!@#$%^&*])/, { message: 'Password must contain at least one special character (e.g., !@#$%^&*)' })
+    @Length(6, 255, { message: 'Password must be between 6 and 255 characters' })
+    password: string;
+
+    @ApiProperty({ 
+        example: "SHA256 Hash",
+    })
+    @IsNotEmpty()
+    @IsString()
+    @Length(1, 515)
+    code: string;
+}

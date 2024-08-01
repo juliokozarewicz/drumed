@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import {
     CodeAccountActivateDTO, resendUserDTO, UserEntityDTO,
     changePasswordLinkDTO, changePasswordDTO, LoginDTO,
-    ProfileDTO, deletAccountLinkDTO
+    ProfileDTO, deletAccountLinkDTO, deletAccountDTO
 } from './accounts.dto';
 import { ProfileEntity, UserEntity, CodeAccountActivate } from './accounts.entity';
 import * as bcrypt from 'bcryptjs';
@@ -116,8 +116,8 @@ export class UserService {
                 message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/signup" },
-                    next: { href: "/accounts/signup" },
-                    prev: { href: "/accounts/signup" }
+                    next: { href: "/accounts/login" },
+                    prev: { href: "/accounts/login" }
                 }
             });
         }
@@ -131,11 +131,11 @@ export class UserService {
             // get user data
             const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(resendActivateDTO.email) } });
 
-            // Account not activated (deleted or banned)
+            // account not activated (deleted or banned)
             if (!existingUser.isActive) {
                 throw new UnauthorizedException({
                     statusCode: 401,
-                    message: `Account not activated`,
+                    message: `account not activated, please contact support`,
                     _links: {
                         self: { href: "/accounts/resend-verify-email" },
                         next: { href: "/accounts/signup" },
@@ -212,7 +212,7 @@ export class UserService {
                 message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/resend-verify-email" },
-                    next: { href: "/accounts/resend-verify-email" },
+                    next: { href: "/accounts/login" },
                     prev: { href: "/accounts/login" }
                 }
             });
@@ -238,11 +238,11 @@ export class UserService {
                 // Active account
                 const activeAccEnd = await this.userRepository.findOne( { where: { email: sanitizeEmail(accActivateDTO.email) } } );
 
-                // Account not activated (deleted or banned)
+                // account not activated (deleted or banned)
                 if (!activeAccEnd.isActive) {
                     throw new UnauthorizedException({
                         statusCode: 401,
-                        message: `Account not activated`,
+                        message: `account not activated, please contact support`,
                         _links: {
                             self: { href: "/accounts/verify-email" },
                             next: { href: "/accounts/signup" },
@@ -290,7 +290,7 @@ export class UserService {
                 message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/verify-email" },
-                    next: { href: "/accounts/resend-verify-email" },
+                    next: { href: "/accounts/login" },
                     prev: { href: "/accounts/login" }
                 }
             });
@@ -331,11 +331,11 @@ export class UserService {
                 });
             }
 
-            // Account not activated (deleted or banned)
+            // account not activated (deleted or banned)
             if (!existingUser.isActive) {
                 throw new UnauthorizedException({
                     statusCode: 401,
-                    message: `Account not activated`,
+                    message: `account not activated, please contact support`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
                         next: { href: "/accounts/signup" },
@@ -387,7 +387,7 @@ export class UserService {
                 message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/change-password-link" },
-                    next: { href: "/accounts/change-password-link" },
+                    next: { href: "/accounts/login" },
                     prev: { href: "/accounts/login" }
                 }
             });
@@ -429,11 +429,11 @@ export class UserService {
                 });
             }
 
-            // Account not activated (deleted or banned)
+            // account not activated (deleted or banned)
             if (!existingUser.isActive) {
                 throw new UnauthorizedException({
                     statusCode: 401,
-                    message: `Account not activated`,
+                    message: `account not activated, please contact support`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
                         next: { href: "/accounts/signup" },
@@ -494,7 +494,7 @@ export class UserService {
                 message: 'an unexpected error occurred, please try again later',
                 _links: {
                     self: { href: "/accounts/change-password" },
-                    next: { href: "/accounts/change-password-link" },
+                    next: { href: "/accounts/login" },
                     prev: { href: "/accounts/login" }
                 }
             });
@@ -535,11 +535,11 @@ export class UserService {
                 });
             }
 
-            // Account not activated (deleted or banned)
+            // account not activated (deleted or banned)
             if (!user.isActive) {
                 throw new UnauthorizedException({
                     statusCode: 401,
-                    message: `Account not activated`,
+                    message: `account not activated, please contact support`,
                     _links: {
                         self: { href: "/accounts/login" },
                         next: { href: "/accounts/login" },
@@ -602,7 +602,7 @@ export class UserService {
                 statusCode: 500,
                 message: 'an unexpected error occurred, please try again later',
                 _links: {
-                    self: { href: "/accounts/login" },
+                    self: { href: "/accounts/profile" },
                     next: { href: "/accounts/login" },
                     prev: { href: "/accounts/login" }
                 }
@@ -650,7 +650,7 @@ export class UserService {
                 statusCode: 500,
                 message: 'an unexpected error occurred, please try again later',
                 _links: {
-                    self: { href: "/accounts/login" },
+                    self: { href: "/accounts/profile-update" },
                     next: { href: "/accounts/login" },
                     prev: { href: "/accounts/login" }
                 }
@@ -659,7 +659,7 @@ export class UserService {
 
     }
 
-    // Change password Link
+    // delete account link
     async deletAccountLink(deletAccountLinkDTO: deletAccountLinkDTO): Promise<any> {
 
         try {
@@ -693,11 +693,11 @@ export class UserService {
                 });
             }
 
-            // Account not activated (deleted or banned)
+            // account not activated (deleted or banned)
             if (!existingUser.isActive) {
                 throw new UnauthorizedException({
                     statusCode: 401,
-                    message: `Account not activated`,
+                    message: `account not activated, please contact support`,
                     _links: {
                         self: { href: "/accounts/change-password-link" },
                         next: { href: "/accounts/signup" },
@@ -737,7 +737,7 @@ export class UserService {
         } catch (error) {
 
             // logs
-            logsGenerator('error', `error sending account deletion link [deletAccountLink()]: ${error}`)
+            logsGenerator('error', `An error occurred while deleting the account: ${sanitizeEmail(deletAccountLinkDTO.email)} [deletAccount()]: ${error}`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
                 throw error;
@@ -748,8 +748,112 @@ export class UserService {
                 statusCode: 500,
                 message: 'an unexpected error occurred, please try again later',
                 _links: {
-                    self: { href: "/accounts/change-password-link" },
-                    next: { href: "/accounts/change-password-link" },
+                    self: { href: "/accounts/delete-account-link" },
+                    next: { href: "/accounts/login" },
+                    prev: { href: "/accounts/login" }
+                }
+            });
+        }
+    }
+
+    // delete account
+    async deletAccount(deletAccountDTO: deletAccountDTO): Promise<any> {
+
+        try {
+
+            // get user data
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(deletAccountDTO.email) } });
+            const CodeAccDelete = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(deletAccountDTO.email), code: sanitizeString(deletAccountDTO.code) }});
+
+            // verify credentials
+            if (!existingUser || !await bcrypt.compare(deletAccountDTO.password, existingUser.password)) {
+                throw new UnauthorizedException({
+                    statusCode: 401,
+                    message: `invalid credentials`,
+                    _links: {
+                        self: { href: "/accounts/delete-account" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }            
+
+            // email not activated
+            if (existingUser.isEmailConfirmed === false) {
+                throw new UnauthorizedException({
+                    statusCode: 401,
+                    message: `email not activated`,
+                    _links: {
+                        self: { href: "/accounts/delete-account" },
+                        next: { href: "/accounts/signup" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            // account not activated (deleted or banned)
+            if (!existingUser.isActive) {
+                throw new UnauthorizedException({
+                    statusCode: 401,
+                    message: `account not activated, please contact support`,
+                    _links: {
+                        self: { href: "/accounts/delete-account" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            if (CodeAccDelete) {
+                await this.userRepository.manager.transaction(async transactionalEntityManager => {
+                    // delete all codes
+                    const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(deletAccountDTO.email) } } );
+
+                    for (let i = 0; i < deleteAllCodes.length; i++) {
+                        await this.userAccCodeActivate.remove(deleteAllCodes[i]);
+                    }
+
+                    // delete account #####
+                    // logic here
+                });
+            } else {
+                throw new UnauthorizedException({
+                    statusCode: 401,
+                    message: `account deletion code is invalid`,
+                    _links: {
+                        self: { href: "/accounts/delete-account" },
+                        next: { href: "/accounts/delete-account-link" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+            }
+
+            return {
+                statusCode: 201,
+                message: "Account has been successfully deleted",
+                _links: {
+                    self: { href: "/accounts/delete-account" },
+                    next: { href: "/accounts/login" },
+                    prev: { href: "/accounts/login" }
+                }
+            };
+
+        } catch (error) {
+
+            // logs
+            logsGenerator('error', `invalid password verification code [changePassword()]`)
+        
+            if (this.knownExceptions.some(exc => error instanceof exc)) {
+                throw error;
+            }
+        
+            // return server error
+            throw new InternalServerErrorException({
+                statusCode: 500,
+                message: 'an unexpected error occurred, please try again later',
+                _links: {
+                    self: { href: "/accounts/delete-account" },
+                    next: { href: "/accounts/login" },
                     prev: { href: "/accounts/login" }
                 }
             });
@@ -762,7 +866,7 @@ export class UserService {
             const saltRounds = 12;
             return bcrypt.hash(password, saltRounds);
         } catch (error) {
-            logsGenerator('error', `bcrypt error [hashPassword()]: ${error}`)
+            logsGenerator('critical', `bcrypt error [hashPassword()]: ${error}`)
         }
     }    
 
@@ -790,7 +894,7 @@ export class UserService {
         } catch (error) {
 
             // logs
-            logsGenerator('error', `error with code delivery service via email [sendEmailVerify()]: ${error}`)
+            logsGenerator('critical', `error with code delivery service via email [sendEmailVerify()]: ${error}`)
 
             if (this.knownExceptions.some(exc => error instanceof exc)) {
                 throw error;
@@ -801,8 +905,8 @@ export class UserService {
                 statusCode: 500,
                 message: 'an unexpected error occurred, please try again later',
                 _links: {
-                    self: { href: "/accounts/verify-email" },
-                    next: { href: "/accounts/resend-verify-email" },
+                    self: { href: "/accounts/login" },
+                    next: { href: "/accounts/login" },
                     prev: { href: "/accounts/login" }
                 }
             });
