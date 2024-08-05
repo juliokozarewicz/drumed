@@ -21,10 +21,10 @@ export class drugController {
     })
     createDrug(
         @Req() req: any,
-        @Body(new ValidationPipe({ transform: true })) body: createDTO
+        @Body(new ValidationPipe({ transform: true })) createDTO: createDTO
     ) {
         const userData = req.user;
-      return this.drugServices.createDrug(userData, body);
+      return this.drugServices.createDrug(userData, createDTO);
     }
 
     @Get('read')
