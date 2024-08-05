@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
+import { UserEntity } from '../accounts/accounts.entity';
 
 @Entity()
-export class drugEntity {
+export class DrugEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -43,4 +44,7 @@ export class drugEntity {
 
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
+
+  @ManyToOne(() => UserEntity, user => user.userInsert)
+  user: UserEntity;
 }

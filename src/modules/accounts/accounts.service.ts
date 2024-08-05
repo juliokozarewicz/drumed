@@ -1,4 +1,7 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import {
+    BadRequestException, ConflictException, Injectable,
+    InternalServerErrorException, UnauthorizedException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -586,7 +589,11 @@ export class UserService {
             // get profile user data
             const profile = await this.profileRepository.findOne({ where: { id: sanitizeUserId(userData.userId) } });
 
-            return profile;
+            return {
+                "biography": profile.biography,
+                "phone": profile.phone,
+                "cpf": profile.cpf
+            };
 
         } catch (error) {
 

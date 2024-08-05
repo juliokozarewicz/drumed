@@ -1,5 +1,3 @@
-// email.service.ts
-
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { logsGenerator } from './accounts.logs';

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, ValidationPipe, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, ValidationPipe, Put, Delete, UseGuards, Param, Req } from '@nestjs/common';
 import { drugServices } from './drugs.service';
 import { createDTO, updateDTO, deleteDTO } from './drugs.dto';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -22,8 +22,9 @@ export class drugController {
     @Get('read')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    readDrug() {
-        return this.drugServices.readDrug();
+    readDrug(@Req() req: any) {
+        const userData = req.user;
+        return this.drugServices.readDrug(userData);
     }
 
     @Put('update')

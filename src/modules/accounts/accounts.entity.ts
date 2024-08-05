@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Unique, OneToMany } from 'typeorm';
+import { DrugEntity } from '../drugs/drugs.entity';
 
 
 @Entity()
@@ -45,6 +46,9 @@ export class UserEntity {
 
     @Column({ type: 'varchar', length: 255 })
     password: string;
+
+    @OneToMany(() => DrugEntity, drug => drug.user, { onDelete: 'CASCADE' })
+    userInsert: DrugEntity[];
 }
 
 @Entity()

@@ -1,19 +1,22 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { drugEntity } from './drugs.entity';
+import { DrugEntity } from './drugs.entity';
 import { Repository } from 'typeorm';
+import { createDTO, updateDTO, deleteDTO } from './drugs.dto';
+import { sanitizeEmail, sanitizeUserId, sanitizeString } from './drugs.sanitize';
+
 
 @Injectable()
 export class drugServices {
 
   // ---------------------------------------------------------------------------------
   constructor(
-    @InjectRepository(drugEntity)
-      private readonly drugEntity: Repository<drugEntity>,
+    @InjectRepository(DrugEntity)
+      private readonly DrugEntity: Repository<DrugEntity>,
   ) {}
   // ---------------------------------------------------------------------------------
 
-  async createDrug(body: any) {
+  async createDrug(body: createDTO) {
     //const id = body['id'];
     const name = body['name'];
     const barcode = body['barcode'];
@@ -28,7 +31,7 @@ export class drugServices {
     const restricted = body['restricted'];
 
     // insert in DB
-    const drugData = this.drugEntity.create({
+    const drugData = this.DrugEntity.create({
       //id,
       name,
       barcode,
@@ -43,15 +46,16 @@ export class drugServices {
       restricted
     });
   
-    return await this.drugEntity.save(drugData);
+    return await this.DrugEntity.save(drugData);
   }
 
-  async readDrug() {
+  async readDrug(userData) {
     // get from DB
-    return await this.drugEntity.find();
+    console.log(userData.userId)
+    return await this.DrugEntity.find();
   }
 
-  async updateDrug(body: any) {
+  async updateDrug(body: updateDTO) {
     const id = body['id'];
     const name = body['name'];
     const barcode = body['barcode'];
@@ -66,7 +70,7 @@ export class drugServices {
     const restricted = body['restricted'];
 
     // search in DB
-    const drugUpdate = await this.drugEntity.findOne({ where: { id } });
+    const drugUpdate = await this.DrugEntity.findOne({ where: { id } });
 
     if (!drugUpdate) {
       throw new NotFoundException(`not found`);
@@ -85,10 +89,10 @@ export class drugServices {
     drugUpdate.batch = batch;
     drugUpdate.restricted = restricted;
 
-    return await this.drugEntity.save(drugUpdate);
+    return await this.DrugEntity.save(drugUpdate);
   }
 
-  async deleteDrug(body: any) {
+  async deleteDrug(body: deleteDTO) {
 
     const id = body['id']
 
@@ -97,13 +101,13 @@ export class drugServices {
     }
 
     // search in DB
-    const drugDelete = await this.drugEntity.findOne({ where: { id } });
+    const drugDelete = await this.DrugEntity.findOne({ where: { id } });
 
     if (!drugDelete) {
       throw new NotFoundException(`not found`);
     }
 
-    return await this.drugEntity.delete(id);
+    return await this.DrugEntity.delete(id);
  
   }
 }
