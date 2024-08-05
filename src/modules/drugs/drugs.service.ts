@@ -24,22 +24,22 @@ export class drugServices {
 ];
   // ---------------------------------------------------------------------------------
 
-  async createDrug(userData: any, body: createDTO) {
+  async createDrug(userData: any, createDTO: createDTO) {
 
     try {
 
-      const name = body['name'];
+      const name = createDTO.name;
       const email = sanitizeEmail(userData.username);
-      const barcode = body['barcode'];
-      const description = body['description'];
-      const laboratory = body['laboratory'];
-      const unitOfMeasurement = body['unitOfMeasurement'];
-      const purchasePrice = body['purchasePrice'];
-      const sellingPrice = body['sellingPrice'];
-      const expirationDate = body['expirationDate'];
-      const category = body['category'];
-      const batch = body['batch'];
-      const restricted = body['restricted'];
+      const barcode = createDTO.barcode;
+      const description = createDTO.description;
+      const laboratory = createDTO.laboratory;
+      const unitOfMeasurement = createDTO.unitOfMeasurement;
+      const purchasePrice = createDTO.purchasePrice;
+      const sellingPrice = createDTO.sellingPrice;
+      const expirationDate = createDTO.expirationDate;
+      const category = createDTO.category;
+      const batch = createDTO.batch;
+      const restricted = createDTO.restricted;
 
       // commit databse
       const drugData = this.DrugEntity.create({
