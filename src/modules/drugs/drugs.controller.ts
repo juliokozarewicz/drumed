@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, ValidationPipe, Put, Delete, UseGuards, Param, Req } from '@nestjs/common';
 import { drugServices } from './drugs.service';
 import { createDTO, updateDTO, deleteDTO } from './drugs.dto';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 
@@ -14,7 +14,11 @@ export class drugController {
     @Post('insert')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    @ApiQuery({ type: createDTO})
+    @ApiBody({ type: createDTO})
+    @ApiOperation({
+        summary: 'Create Medication',
+        description: 'Allows the user to create a new medication by providing the necessary details.'
+    })
     createDrug(
         @Req() req: any,
         @Body(new ValidationPipe({ transform: true })) body: createDTO
@@ -26,6 +30,10 @@ export class drugController {
     @Get('read')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Get Medications',
+        description: 'Retrieves a list of medications available in the system.'
+    })
     readDrug(@Req() req: any) {
         const userData = req.user;
         return this.drugServices.readDrug(userData);
