@@ -17,9 +17,14 @@ export function sanitizeNameString(input: string): string {
 }
 
 export function sanitizeEmail(input: string): string {
+    if (!input || input.trim().length === 0) {
+        throw new BadRequestException('email cannot be empty');
+    }
 
-    if (/[^\w.@+-]/g.test(input)) {
-        throw new BadRequestException('has disallowed characters');
+    const allowedCharsRegex = /^[\w.@+-]+$/;
+
+    if (!allowedCharsRegex.test(input)) {
+        throw new BadRequestException('email contains disallowed characters');
     }
 
     const sanitizedInput = sanitizeHtml(input, {

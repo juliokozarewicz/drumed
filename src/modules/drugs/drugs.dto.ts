@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsNotEmpty, IsBoolean, IsString, Length } from 'class-validator';
+import { IsUUID, IsNotEmpty, IsBoolean, IsString, Length, IsEmail } from 'class-validator';
 
 export class createDTO {
  

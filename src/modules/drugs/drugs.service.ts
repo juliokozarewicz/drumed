@@ -16,9 +16,10 @@ export class drugServices {
   ) {}
   // ---------------------------------------------------------------------------------
 
-  async createDrug(body: createDTO) {
+  async createDrug(userData, body: createDTO) {
     //const id = body['id'];
     const name = body['name'];
+    const email = sanitizeEmail(userData.username);
     const barcode = body['barcode'];
     const description = body['description'];
     const laboratory = body['laboratory'];
@@ -34,6 +35,7 @@ export class drugServices {
     const drugData = this.DrugEntity.create({
       //id,
       name,
+      email,
       barcode,
       description,
       laboratory,
@@ -50,9 +52,7 @@ export class drugServices {
   }
 
   async readDrug(userData) {
-    // get from DB
-    console.log(userData.userId)
-    return await this.DrugEntity.find();
+    return await this.DrugEntity.find({ where: {email: userData.username} });
   }
 
   async updateDrug(body: updateDTO) {

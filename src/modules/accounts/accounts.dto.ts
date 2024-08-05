@@ -23,6 +23,7 @@ export class UserEntityDTO {
     @ApiProperty({ 
         example: 'robertfolk@gmail.com', 
     })
+    @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
 
@@ -64,6 +65,7 @@ export class resendUserDTO {
     @ApiProperty({ 
         example: 'robertfolk@gmail.com', 
     })
+    @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
 
@@ -109,6 +111,7 @@ export class CodeAccountActivateDTO {
     @ApiProperty({
         example: 'robertfolk@gmail.com', 
     })
+    @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
 
@@ -134,6 +137,7 @@ export class changePasswordLinkDTO {
     @ApiProperty({ 
         example: 'robertfolk@gmail.com', 
     })
+    @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
 
@@ -151,6 +155,7 @@ export class changePasswordDTO {
     @ApiProperty({ 
         example: 'robertfolk@gmail.com', 
     })
+    @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
 
@@ -189,6 +194,7 @@ export class LoginDTO {
     @ApiProperty({ 
         example: 'robertfolk@gmail.com', 
     })
+    @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
 
@@ -206,6 +212,7 @@ export class deletAccountLinkDTO {
     @ApiProperty({ 
         example: 'robertfolk@gmail.com', 
     })
+    @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
 
@@ -223,6 +230,7 @@ export class deletAccountDTO {
     @ApiProperty({ 
         example: 'robertfolk@gmail.com', 
     })
+    @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
 

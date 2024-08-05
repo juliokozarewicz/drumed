@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Unique, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Unique, OneToMany, ManyToOne } from 'typeorm';
 import { DrugEntity } from '../drugs/drugs.entity';
 
 
@@ -20,6 +20,7 @@ export class ProfileEntity {
 @Entity()
 @Unique(['email'])
 export class UserEntity {
+
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
@@ -29,26 +30,27 @@ export class UserEntity {
     @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    @Column({ type: 'boolean', default: true })
+    @Column({ type: 'boolean', default: true, nullable: false })
     isActive: boolean;
 
-    @Column({ type: 'boolean', default: false })
+    @Column({ type: 'boolean', default: false, nullable: false })
     level: boolean;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: false })
     name: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: false })
     email: string;
 
-    @Column({ type: 'boolean', default: false })
+    @Column({ type: 'boolean', default: false, nullable: false })
     isEmailConfirmed: boolean;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 255, nullable: false })
     password: string;
 
-    @OneToMany(() => DrugEntity, drug => drug.user, { onDelete: 'CASCADE' })
-    userInsert: DrugEntity[];
+    // user data relation
+    @OneToMany(() => DrugEntity, drug => drug.user)
+    drugs: DrugEntity[];
 }
 
 @Entity()

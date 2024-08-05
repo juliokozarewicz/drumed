@@ -15,8 +15,12 @@ export class drugController {
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
     @ApiQuery({ type: createDTO})
-    createDrug(@Body(new ValidationPipe({ transform: true })) body: createDTO) {
-      return this.drugServices.createDrug(body);
+    createDrug(
+        @Req() req: any,
+        @Body(new ValidationPipe({ transform: true })) body: createDTO
+    ) {
+        const userData = req.user;
+      return this.drugServices.createDrug(userData, body);
     }
 
     @Get('read')

@@ -6,6 +6,9 @@ export class DrugEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  email: string;
+
   @Column({ length: 255, nullable: false })
   name: string;
 
@@ -45,6 +48,7 @@ export class DrugEntity {
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  @ManyToOne(() => UserEntity, user => user.userInsert)
+  // user relation
+  @ManyToOne(() => UserEntity, user => user.drugs, { onDelete: 'CASCADE' })
   user: UserEntity;
 }
