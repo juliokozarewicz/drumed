@@ -16,7 +16,7 @@ export class drugServices {
   ) {}
   // ---------------------------------------------------------------------------------
 
-  async createDrug(userData, body: createDTO) {
+  async createDrug(userData: any, body: createDTO) {
     //const id = body['id'];
     const name = body['name'];
     const email = sanitizeEmail(userData.username);
@@ -51,7 +51,7 @@ export class drugServices {
     return await this.DrugEntity.save(drugData);
   }
 
-  async readDrug(userData) {
+  async readDrug(userData: any) {
     return await this.DrugEntity.find({ where: {email: userData.username} });
   }
 
