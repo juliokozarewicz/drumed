@@ -65,11 +65,11 @@ export class UserService {
             
             // insert data user
             const newUser = new UserEntity();
-            newUser.isActive = userDto.isActive;
-            newUser.level = userDto.level;
+            newUser.isActive = true;
+            newUser.level = false;
             newUser.name = sanitizeNameString(userDto.name);
             newUser.email = sanitizeEmail(userDto.email);
-            newUser.isEmailConfirmed = userDto.isEmailConfirmed;
+            newUser.isEmailConfirmed = false;
             newUser.password = await this.hashPassword(userDto.password);
 
             await this.userRepository.manager.transaction(async transactionalEntityManager => {

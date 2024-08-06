@@ -7,12 +7,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UserEntityDTO {
 
-    @IsBoolean()
-    isActive: boolean;
-
-    @IsBoolean()
-    level: boolean;
-
     @ApiProperty({ 
         example: 'Robert Folk',
     })
@@ -26,10 +20,6 @@ export class UserEntityDTO {
     @IsNotEmpty()
     @IsEmail({}, { message: 'Please enter a valid email address' })
     email: string;
-
-    @IsNotEmpty()
-    @IsBoolean()
-    isEmailConfirmed: boolean;
 
     @ApiProperty({ 
         example: "www.yourlink.com/auth/login",
@@ -52,12 +42,6 @@ export class UserEntityDTO {
     @Length(6, 255, { message: 'Password must be between 6 and 255 characters' })
     password: string;
 
-    constructor(partial: Partial<UserEntityDTO>) {
-        Object.assign(this, partial);
-        this.isActive = true;
-        this.level = false;
-        this.isEmailConfirmed = false;
-    }
 }
 
 export class resendUserDTO {
