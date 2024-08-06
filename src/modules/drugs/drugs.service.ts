@@ -1,4 +1,7 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException, ConflictException, Injectable, InternalServerErrorException,
+  NotFoundException, UnauthorizedException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DrugEntity } from './drugs.entity';
 import { Repository } from 'typeorm';
@@ -20,7 +23,8 @@ export class drugServices {
   private readonly knownExceptions = [
     ConflictException,
     BadRequestException,
-    UnauthorizedException
+    UnauthorizedException,
+    NotFoundException,
   ];
   // ---------------------------------------------------------------------------------
 
@@ -148,40 +152,93 @@ export class drugServices {
   }
 
   async updateDrug(userData: any, updateDTO: updateDTO) {
-    const id = updateDTO.id;
-    const name = updateDTO.name;
-    const barcode = updateDTO.barcode;
-    const description = updateDTO.description;
-    const laboratory = updateDTO.laboratory;
-    const unitOfMeasurement = updateDTO.unitOfMeasurement;
-    const purchasePrice = updateDTO.purchasePrice;
-    const sellingPrice = updateDTO.sellingPrice;
-    const expirationDate = updateDTO.expirationDate;
-    const category = updateDTO.category;
-    const batch = updateDTO.batch;
-    const restricted = updateDTO.restricted;
 
-    // search in DB
-    const drugUpdate = await this.DrugEntity.findOne({ where: { id } });
+    try {
 
-    if (!drugUpdate) {
-      throw new NotFoundException(`not found`);
+      const id = updateDTO.id;
+      const name = updateDTO.name;
+      const barcode = updateDTO.barcode;
+      const description = updateDTO.description;
+      const laboratory = updateDTO.laboratory;
+      const unitOfMeasurement = updateDTO.unitOfMeasurement;
+      const purchasePrice = updateDTO.purchasePrice;
+      const sellingPrice = updateDTO.sellingPrice;
+      const expirationDate = updateDTO.expirationDate;
+      const category = updateDTO.category;
+      const batch = updateDTO.batch;
+      const restricted = updateDTO.restricted;
+
+      // search in DB
+      const drugUpdate = await this.DrugEntity.findOne({ where: { id: id, userID: userData.userID } });
+
+      if (!drugUpdate) {
+
+        throw new NotFoundException({
+          statusCode: 404,
+          message: `not found`,
+          _links: {
+              self: { href: "/accounts/update" },
+              next: { href: "/accounts/read" },
+              prev: { href: "/accounts/read" }
+          }
+        });
+
+      }
+
+      drugUpdate.id = id;
+      drugUpdate.name = name;
+      drugUpdate.barcode = barcode;
+      drugUpdate.description = description;
+      drugUpdate.laboratory = laboratory;
+      drugUpdate.unitOfMeasurement = unitOfMeasurement;
+      drugUpdate.purchasePrice = purchasePrice;
+      drugUpdate.sellingPrice = sellingPrice;
+      drugUpdate.expirationDate = expirationDate;
+      drugUpdate.category = category;
+      drugUpdate.batch = batch;
+      drugUpdate.restricted = restricted;
+
+      await this.DrugEntity.save(drugUpdate);
+
+      return {
+        "id": drugUpdate.id,
+        "name": drugUpdate.name,
+        "barcode": drugUpdate.barcode,
+        "description": drugUpdate.description,
+        "laboratory": drugUpdate.laboratory,
+        "unitOfMeasurement": drugUpdate.unitOfMeasurement,
+        "purchasePrice": drugUpdate.purchasePrice,
+        "sellingPrice": drugUpdate.sellingPrice,
+        "expirationDate": drugUpdate.expirationDate,
+        "category": drugUpdate.category,
+        "batch": drugUpdate.batch,
+        "restricted": drugUpdate.restricted,
+      }
+    
+    } catch (error) {
+  
+      if (this.knownExceptions.some(exc => error instanceof exc)) {
+
+        throw error;
+
+      } else {
+
+        // logs
+        logsGenerator('error', `update drug service [updateDrug()]: ${error}`)
+
+        // return server error
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'an unexpected error occurred, please try again later',
+          _links: {
+              self: { href: "/api/update" },
+              next: { href: "/api/update" },
+              prev: { href: "/api/read" }
+          }
+        });
+
+      }
     }
-
-    drugUpdate.id = id;
-    drugUpdate.name = name;
-    drugUpdate.barcode = barcode;
-    drugUpdate.description = description;
-    drugUpdate.laboratory = laboratory;
-    drugUpdate.unitOfMeasurement = unitOfMeasurement;
-    drugUpdate.purchasePrice = purchasePrice;
-    drugUpdate.sellingPrice = sellingPrice;
-    drugUpdate.expirationDate = expirationDate;
-    drugUpdate.category = category;
-    drugUpdate.batch = batch;
-    drugUpdate.restricted = restricted;
-
-    return await this.DrugEntity.save(drugUpdate);
   }
 
   async deleteDrug(body: deleteDTO) {

@@ -1,6 +1,6 @@
 import {
     BadRequestException, ConflictException, Injectable,
-    InternalServerErrorException, UnauthorizedException
+    InternalServerErrorException, NotFoundException, UnauthorizedException
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -37,11 +37,13 @@ export class UserService {
     ) {}
 
     // exception handling
-    private readonly knownExceptions = [
-        ConflictException,
-        BadRequestException,
-        UnauthorizedException
-    ];
+     // exception handling
+  private readonly knownExceptions = [
+    ConflictException,
+    BadRequestException,
+    UnauthorizedException,
+    NotFoundException,
+  ];
     // ---------------------------------------------------------------------------------
 
     // insert new user
@@ -509,7 +511,7 @@ export class UserService {
             } else {
 
                 // logs
-                logsGenerator('error', `invalid password verification code [changePassword()]`)
+                logsGenerator('error', `invalid password verification code [changePassword()]: ${error}`)
 
                 // return server error
                 throw new InternalServerErrorException({
@@ -809,9 +811,13 @@ export class UserService {
             // get user data
             const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(deletAccountDTO.email) } });
             const CodeAccDelete = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(deletAccountDTO.email), code: sanitizeString(deletAccountDTO.code) }});
+            const validPassword = await bcrypt.compare(deletAccountDTO.password, existingUser.password);
 
             // verify credentials
-            if (!existingUser || !await bcrypt.compare(deletAccountDTO.password, existingUser.password)) {
+            if (
+                !existingUser ||
+                !validPassword 
+            ) {
                 throw new UnauthorizedException({
                     statusCode: 401,
                     message: `invalid credentials`,
@@ -893,7 +899,7 @@ export class UserService {
             } else {
 
                 // logs
-                logsGenerator('error', `invalid password verification code [changePassword()]`)
+                logsGenerator('error', `invalid password verification code [changePassword()]: ${error}`)
 
                 // return server error
                 throw new InternalServerErrorException({
