@@ -23,8 +23,10 @@ export class drugController {
         @Req() req: any,
         @Body(new ValidationPipe({ transform: true })) createDTO: createDTO
     ) {
+
         const userData = req.user;
-      return this.drugServices.createDrug(userData, createDTO);
+        return this.drugServices.createDrug(userData, createDTO);
+
     }
 
     @Get('read')
@@ -35,16 +37,27 @@ export class drugController {
         description: 'Retrieves a list of medications available in the system.'
     })
     readDrug(@Req() req: any) {
+
         const userData = req.user;
         return this.drugServices.readDrug(userData);
+
     }
 
     @Put('update')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    @ApiQuery({ type: updateDTO})
-    updateDrug(@Body(new ValidationPipe({ transform: true })) body: updateDTO) {
-        return this.drugServices.updateDrug(body);
+    @ApiOperation({
+        summary: 'Update Medication',
+        description: 'Allows the user to update an existing medication by providing the necessary details.'
+    })
+    updateDrug(
+        @Req() req: any,
+        @Body(new ValidationPipe({ transform: true })) updateDTO: updateDTO
+    ) {
+
+        const userData = req.user;
+        return this.drugServices.updateDrug(updateDTO);
+
     }
 
     @Delete('delete')

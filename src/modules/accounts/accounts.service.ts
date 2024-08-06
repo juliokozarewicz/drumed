@@ -21,6 +21,7 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
 
+    // ---------------------------------------------------------------------------------
     constructor(
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
@@ -41,6 +42,7 @@ export class UserService {
         BadRequestException,
         UnauthorizedException
     ];
+    // ---------------------------------------------------------------------------------
 
     // insert new user
     async createUser(userDto: UserEntityDTO): Promise<any> {
@@ -106,23 +108,27 @@ export class UserService {
 
         } catch (error) {
 
-            // logs
-            logsGenerator('error', `create user service [createUser()]: ${error}`)
-
             if (this.knownExceptions.some(exc => error instanceof exc)) {
-                throw error;
-            }
 
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/signup" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
+                throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('error', `create user service [createUser()]: ${error}`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/signup" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
+            }
         }
     }
 
@@ -201,24 +207,28 @@ export class UserService {
             };
 
         } catch (error) {
-
-            // logs
-            logsGenerator('error', `error when resending the email link [resendVerifyEmailCode()]: ${error}`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
+
                 throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('error', `error when resending the email link [resendVerifyEmailCode()]: ${error}`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/resend-verify-email" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
             }
-        
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/resend-verify-email" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
         }
     }
 
@@ -279,24 +289,28 @@ export class UserService {
             }
 
         } catch (error) {
-
-            // logs
-            logsGenerator('error', `error with verify email code [verifyEmailCode()]: ${error}`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
+
                 throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('error', `error with verify email code [verifyEmailCode()]: ${error}`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/verify-email" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
             }
-        
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/verify-email" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
         }
     }
 
@@ -376,24 +390,28 @@ export class UserService {
             };
 
         } catch (error) {
-
-            // logs
-            logsGenerator('error', `error sending password change link [changePasswordLink()]: ${error}`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
+
                 throw error;
+
+            } else {
+                
+                // logs
+                logsGenerator('error', `error sending password change link [changePasswordLink()]: ${error}`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/change-password-link" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
             }
-        
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/change-password-link" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
         }
     }
 
@@ -483,24 +501,28 @@ export class UserService {
             };
 
         } catch (error) {
-
-            // logs
-            logsGenerator('error', `invalid password verification code [changePassword()]`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
+
                 throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('error', `invalid password verification code [changePassword()]`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/change-password" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
             }
-        
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/change-password" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
         }
     }
 
@@ -560,24 +582,28 @@ export class UserService {
             return jwtToken;
 
         } catch (error) {
-
-            // logs
-            logsGenerator('error', `login user service [login()]: ${error}`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
+
                 throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('error', `login user service [login()]: ${error}`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/login" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
             }
-        
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/login" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
         }
     }
 
@@ -596,24 +622,28 @@ export class UserService {
             };
 
         } catch (error) {
-
-            // logs
-            logsGenerator('error', `profile user service [profile()]: ${error}`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
+
                 throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('error', `profile user service [profile()]: ${error}`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/profile" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
             }
-        
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/profile" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
         }
 
     }
@@ -644,24 +674,28 @@ export class UserService {
             };
 
         } catch (error) {
-
-            // logs
-            logsGenerator('error', `profile user service [updateProfile()]: ${error}`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
+
                 throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('error', `profile user service [updateProfile()]: ${error}`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/profile-update" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
             }
-        
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/profile-update" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
         }
 
     }
@@ -742,24 +776,28 @@ export class UserService {
             };
 
         } catch (error) {
-
-            // logs
-            logsGenerator('error', `An error occurred while deleting the account: ${sanitizeEmail(deletAccountLinkDTO.email)} [deletAccount()]: ${error}`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
+
                 throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('error', `An error occurred while deleting the account: ${sanitizeEmail(deletAccountLinkDTO.email)} [deletAccount()]: ${error}`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/delete-account-link" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
             }
-        
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/delete-account-link" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
         }
     }
 
@@ -847,24 +885,28 @@ export class UserService {
             };
 
         } catch (error) {
-
-            // logs
-            logsGenerator('error', `invalid password verification code [changePassword()]`)
         
             if (this.knownExceptions.some(exc => error instanceof exc)) {
+
                 throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('error', `invalid password verification code [changePassword()]`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/delete-account" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
             }
-        
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/delete-account" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
         }
     }
 
@@ -901,23 +943,27 @@ export class UserService {
 
         } catch (error) {
 
-            // logs
-            logsGenerator('critical', `error with code delivery service via email [sendEmailVerify()]: ${error}`)
-
             if (this.knownExceptions.some(exc => error instanceof exc)) {
-                throw error;
-            }
 
-            // return server error
-            throw new InternalServerErrorException({
-                statusCode: 500,
-                message: 'an unexpected error occurred, please try again later',
-                _links: {
-                    self: { href: "/accounts/login" },
-                    next: { href: "/accounts/login" },
-                    prev: { href: "/accounts/login" }
-                }
-            });
+                throw error;
+
+            } else {
+
+                // logs
+                logsGenerator('critical', `error with code delivery service via email [sendEmailVerify()]: ${error}`)
+
+                // return server error
+                throw new InternalServerErrorException({
+                    statusCode: 500,
+                    message: 'an unexpected error occurred, please try again later',
+                    _links: {
+                        self: { href: "/accounts/login" },
+                        next: { href: "/accounts/login" },
+                        prev: { href: "/accounts/login" }
+                    }
+                });
+
+            }
         }
     }
 }

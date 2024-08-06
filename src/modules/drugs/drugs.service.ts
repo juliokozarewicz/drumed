@@ -21,7 +21,7 @@ export class drugServices {
     ConflictException,
     BadRequestException,
     UnauthorizedException
-];
+  ];
   // ---------------------------------------------------------------------------------
 
   async createDrug(userData: any, createDTO: createDTO) {
@@ -76,23 +76,27 @@ export class drugServices {
 
     } catch (error) {
 
-      // logs
-      logsGenerator('error', `create drug service [createDrug()]: ${error}`)
-  
       if (this.knownExceptions.some(exc => error instanceof exc)) {
-          throw error;
-      }
-  
-      // return server error
-      throw new InternalServerErrorException({
-        statusCode: 500,
-        message: 'an unexpected error occurred, please try again later',
-        _links: {
+
+        throw error;
+
+      } else {
+
+        // logs
+        logsGenerator('error', `create drug service [createDrug()]: ${error}`)
+
+        // return server error
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'an unexpected error occurred, please try again later',
+          _links: {
             self: { href: "/api/create" },
             next: { href: "/api/read" },
             prev: { href: "/api/read" }
-        }
-      });
+          }
+        });
+
+      }
     }
   }
 
@@ -118,24 +122,28 @@ export class drugServices {
       }));
 
     } catch (error) {
-
-      // logs
-      logsGenerator('error', `read drug service [readDrug()]: ${error}`)
   
       if (this.knownExceptions.some(exc => error instanceof exc)) {
-          throw error;
+
+        throw error;
+
+      } else {
+
+        // logs
+        logsGenerator('error', `read drug service [readDrug()]: ${error}`)
+
+        // return server error
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'an unexpected error occurred, please try again later',
+          _links: {
+              self: { href: "/api/read" },
+              next: { href: "/api/read" },
+              prev: { href: "/api/read" }
+          }
+        });
+
       }
-  
-      // return server error
-      throw new InternalServerErrorException({
-        statusCode: 500,
-        message: 'an unexpected error occurred, please try again later',
-        _links: {
-            self: { href: "/api/read" },
-            next: { href: "/api/read" },
-            prev: { href: "/api/read" }
-        }
-      });
     }
   }
 
