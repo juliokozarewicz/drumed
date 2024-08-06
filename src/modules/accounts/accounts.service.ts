@@ -816,7 +816,7 @@ export class UserService {
             // verify credentials
             if (
                 !existingUser ||
-                !validPassword 
+                !validPassword
             ) {
                 throw new UnauthorizedException({
                     statusCode: 401,
