@@ -46,6 +46,7 @@ export class drugController {
     @Put('update')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
+    @ApiBody({ type: updateDTO})
     @ApiOperation({
         summary: 'Update Medication',
         description: 'Allows the user to update an existing medication by providing the necessary details.'
@@ -56,7 +57,7 @@ export class drugController {
     ) {
 
         const userData = req.user;
-        return this.drugServices.updateDrug(updateDTO);
+        return this.drugServices.updateDrug(userData, updateDTO);
 
     }
 

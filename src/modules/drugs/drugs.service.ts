@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DrugEntity } from './drugs.entity';
 import { Repository } from 'typeorm';
 import { createDTO, updateDTO, deleteDTO } from './drugs.dto';
-import { sanitizeEmail } from './drugs.sanitize';
+import { sanitizeEmail, sanitizeUserId } from './drugs.sanitize';
 import { logsGenerator } from '../accounts/accounts.logs';
 
 
@@ -29,7 +29,7 @@ export class drugServices {
     try {
 
       const name = createDTO.name;
-      const email = sanitizeEmail(userData.username);
+      const userID = sanitizeUserId(userData.userId);
       const barcode = createDTO.barcode;
       const description = createDTO.description;
       const laboratory = createDTO.laboratory;
@@ -44,7 +44,7 @@ export class drugServices {
       // commit databse
       const drugData = this.DrugEntity.create({
         name,
-        email,
+        userID,
         barcode,
         description,
         laboratory,
@@ -104,7 +104,7 @@ export class drugServices {
 
     try {
 
-      const drugs = await this.DrugEntity.find({ where: {email: sanitizeEmail(userData.username)} });
+      const drugs = await this.DrugEntity.find({ where: { userID: sanitizeUserId(userData.userId) } });
 
       return drugs.map(drug => ({
         id: drug.id,
@@ -147,19 +147,19 @@ export class drugServices {
     }
   }
 
-  async updateDrug(body: updateDTO) {
-    const id = body['id'];
-    const name = body['name'];
-    const barcode = body['barcode'];
-    const description = body['description'];
-    const laboratory = body['laboratory'];
-    const unitOfMeasurement = body['unitOfMeasurement'];
-    const purchasePrice = body['purchasePrice'];
-    const sellingPrice = body['sellingPrice'];
-    const expirationDate = body['expirationDate'];
-    const category = body['category'];
-    const batch = body['batch'];
-    const restricted = body['restricted'];
+  async updateDrug(userData: any, updateDTO: updateDTO) {
+    const id = updateDTO.id;
+    const name = updateDTO.name;
+    const barcode = updateDTO.barcode;
+    const description = updateDTO.description;
+    const laboratory = updateDTO.laboratory;
+    const unitOfMeasurement = updateDTO.unitOfMeasurement;
+    const purchasePrice = updateDTO.purchasePrice;
+    const sellingPrice = updateDTO.sellingPrice;
+    const expirationDate = updateDTO.expirationDate;
+    const category = updateDTO.category;
+    const batch = updateDTO.batch;
+    const restricted = updateDTO.restricted;
 
     // search in DB
     const drugUpdate = await this.DrugEntity.findOne({ where: { id } });

@@ -6,8 +6,8 @@ export class DrugEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  email: string;
+  @PrimaryGeneratedColumn('uuid')
+  userID: string;
 
   @Column({ length: 255, nullable: false })
   name: string;
