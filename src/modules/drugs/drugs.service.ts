@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DrugEntity } from './drugs.entity';
 import { Repository } from 'typeorm';
 import { createDTO, updateDTO, deleteDTO } from './drugs.dto';
-import { sanitizeEmail, sanitizeUserId } from './drugs.sanitize';
+import { sanitizeUserId } from './drugs.sanitize';
 import { logsGenerator } from '../accounts/accounts.logs';
 
 
@@ -33,7 +33,7 @@ export class drugServices {
     try {
 
       const name = createDTO.name;
-      const userID = sanitizeUserId(userData.userId);
+      const userIdInsert = sanitizeUserId(userData.userId);
       const barcode = createDTO.barcode;
       const description = createDTO.description;
       const laboratory = createDTO.laboratory;
@@ -48,7 +48,7 @@ export class drugServices {
       // commit databse
       const drugData = this.DrugEntity.create({
         name,
-        userID,
+        userIdInsert,
         barcode,
         description,
         laboratory,
@@ -110,7 +110,7 @@ export class drugServices {
 
       const drugs = await this.DrugEntity.find({
         where: {
-          userID: sanitizeUserId(userData.userId)
+          userIdInsert: sanitizeUserId(userData.userId)
         },
 
         order: {
@@ -181,7 +181,7 @@ export class drugServices {
       const drugUpdate = await this.DrugEntity.findOne({
         where: {
           id: sanitizeUserId(updateDTO.id),
-          userID: sanitizeUserId(userData.userId)
+          userIdInsert: sanitizeUserId(userData.userId)
         }
       });
 
@@ -223,9 +223,9 @@ export class drugServices {
           statusCode: 404,
           message: `not found`,
           _links: {
-              self: { href: "/accounts/update" },
-              next: { href: "/accounts/read" },
-              prev: { href: "/accounts/read" }
+              self: { href: "/api/update" },
+              next: { href: "/api/read" },
+              prev: { href: "/api/read" }
           }
         });
 
@@ -257,22 +257,70 @@ export class drugServices {
     }
   }
 
-  async deleteDrug(body: deleteDTO) {
+  async deleteDrug(userData: any, deleteDTO: deleteDTO) {
 
-    const id = body['id']
+    try {
+  
+      // search in DB
+      const drugDelete = await this.DrugEntity.findOne({
+        where: {
+          id: sanitizeUserId(deleteDTO.id),
+          userIdInsert: sanitizeUserId(userData.userId)
+        }
+      });
 
-    if (!id) {
-      throw new BadRequestException("id is required")
+      if (drugDelete) {
+
+        await this.DrugEntity.delete(deleteDTO.id);
+
+        return {
+          statusCode: 204,
+          message: "successfully deleted",
+          _links: {
+              self: { href: `/api/delete` },
+              next: { href: "/api/read" },
+              prev: { href: "/api/read" }
+          }
+        };
+
+      } else {
+
+        throw new NotFoundException({
+          statusCode: 404,
+          message: `not found`,
+          _links: {
+              self: { href: "/api/delete" },
+              next: { href: "/api/read" },
+              prev: { href: "/api/read" }
+          }
+        });
+
+      }
+    
+    } catch (error) {
+  
+      if (this.knownExceptions.some(exc => error instanceof exc)) {
+
+        throw error;
+
+      } else {
+
+        // logs
+        logsGenerator('error', `delete drug service [deleteDrug()]: ${error}`)
+
+        // return server error
+        throw new InternalServerErrorException({
+          statusCode: 500,
+          message: 'an unexpected error occurred, please try again later',
+          _links: {
+              self: { href: "/api/delete" },
+              next: { href: "/api/read" },
+              prev: { href: "/api/read" }
+          }
+        });
+
+      }
     }
 
-    // search in DB
-    const drugDelete = await this.DrugEntity.findOne({ where: { id } });
-
-    if (!drugDelete) {
-      throw new NotFoundException(`not found`);
-    }
-
-    return await this.DrugEntity.delete(id);
- 
   }
 }

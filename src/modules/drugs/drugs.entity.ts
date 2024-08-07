@@ -6,8 +6,8 @@ export class DrugEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @PrimaryGeneratedColumn('uuid')
-  userID: string;
+  @Column('uuid')
+  userIdInsert: string;
 
   @Column({ length: 255, nullable: false })
   name: string;

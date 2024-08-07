@@ -64,9 +64,19 @@ export class drugController {
     @Delete('delete')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    @ApiQuery({ type: deleteDTO})
-    deleteDrug(@Body(new ValidationPipe({ transform: true })) body: deleteDTO) {
-        return this.drugServices.deleteDrug(body);
+    @ApiBody({ type: deleteDTO})
+    @ApiOperation({
+        summary: 'Delete Medication',
+        description: 'Allows the user to delete an existing medication by providing the medication ID.'
+      })
+    deleteDrug(
+        @Req() req: any,
+        @Body(new ValidationPipe({ transform: true })) deleteDTO: deleteDTO
+    ) {
+
+        const userData = req.user;
+        return this.drugServices.deleteDrug(userData, deleteDTO);
+
     }
 
 }
