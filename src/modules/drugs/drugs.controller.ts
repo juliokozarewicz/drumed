@@ -36,7 +36,7 @@ export class drugController {
         summary: 'Get Medications',
         description: 'Retrieves a list of medications available in the system.'
     })
-    @ApiQuery({ name: 'sortBy', required: false, description: 'Field to sort by (e.g., name)' })
+    @ApiQuery({ name: 'sortBy', required: false, description: 'Field to sort by (e.g., name)', enum: ['name', 'description'], })
     @ApiQuery({ name: 'sortOrder', required: false, description: 'Sort order', enum: ['asc', 'desc'] })
     readDrug(
         @Req() req: any,
