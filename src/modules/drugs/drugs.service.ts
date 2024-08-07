@@ -108,7 +108,16 @@ export class drugServices {
 
     try {
 
-      const drugs = await this.DrugEntity.find({ where: { userID: sanitizeUserId(userData.userId) } });
+      const drugs = await this.DrugEntity.find({
+        where: {
+          userID: sanitizeUserId(userData.userId)
+        },
+
+        order: {
+          name: 'ASC',
+        }
+
+      });
 
       return drugs.map(drug => ({
         id: drug.id,
@@ -169,9 +178,46 @@ export class drugServices {
       const restricted = updateDTO.restricted;
 
       // search in DB
-      const drugUpdate = await this.DrugEntity.findOne({ where: { id: id, userID: userData.userID } });
+      const drugUpdate = await this.DrugEntity.findOne({
+        where: {
+          id: sanitizeUserId(updateDTO.id),
+          userID: sanitizeUserId(userData.userId)
+        }
+      });
 
-      if (!drugUpdate) {
+      if (drugUpdate) {
+
+        drugUpdate.id = id;
+        drugUpdate.name = name;
+        drugUpdate.barcode = barcode;
+        drugUpdate.description = description;
+        drugUpdate.laboratory = laboratory;
+        drugUpdate.unitOfMeasurement = unitOfMeasurement;
+        drugUpdate.purchasePrice = purchasePrice;
+        drugUpdate.sellingPrice = sellingPrice;
+        drugUpdate.expirationDate = expirationDate;
+        drugUpdate.category = category;
+        drugUpdate.batch = batch;
+        drugUpdate.restricted = restricted;
+
+        await this.DrugEntity.save(drugUpdate);
+
+        return {
+          "id": drugUpdate.id,
+          "name": drugUpdate.name,
+          "barcode": drugUpdate.barcode,
+          "description": drugUpdate.description,
+          "laboratory": drugUpdate.laboratory,
+          "unitOfMeasurement": drugUpdate.unitOfMeasurement,
+          "purchasePrice": drugUpdate.purchasePrice,
+          "sellingPrice": drugUpdate.sellingPrice,
+          "expirationDate": drugUpdate.expirationDate,
+          "category": drugUpdate.category,
+          "batch": drugUpdate.batch,
+          "restricted": drugUpdate.restricted,
+        }  
+      
+      } else {
 
         throw new NotFoundException({
           statusCode: 404,
@@ -183,36 +229,6 @@ export class drugServices {
           }
         });
 
-      }
-
-      drugUpdate.id = id;
-      drugUpdate.name = name;
-      drugUpdate.barcode = barcode;
-      drugUpdate.description = description;
-      drugUpdate.laboratory = laboratory;
-      drugUpdate.unitOfMeasurement = unitOfMeasurement;
-      drugUpdate.purchasePrice = purchasePrice;
-      drugUpdate.sellingPrice = sellingPrice;
-      drugUpdate.expirationDate = expirationDate;
-      drugUpdate.category = category;
-      drugUpdate.batch = batch;
-      drugUpdate.restricted = restricted;
-
-      await this.DrugEntity.save(drugUpdate);
-
-      return {
-        "id": drugUpdate.id,
-        "name": drugUpdate.name,
-        "barcode": drugUpdate.barcode,
-        "description": drugUpdate.description,
-        "laboratory": drugUpdate.laboratory,
-        "unitOfMeasurement": drugUpdate.unitOfMeasurement,
-        "purchasePrice": drugUpdate.purchasePrice,
-        "sellingPrice": drugUpdate.sellingPrice,
-        "expirationDate": drugUpdate.expirationDate,
-        "category": drugUpdate.category,
-        "batch": drugUpdate.batch,
-        "restricted": drugUpdate.restricted,
       }
     
     } catch (error) {
