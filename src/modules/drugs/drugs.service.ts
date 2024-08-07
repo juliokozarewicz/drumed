@@ -5,8 +5,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DrugEntity } from './drugs.entity';
 import { Repository } from 'typeorm';
-import { createDTO, updateDTO, deleteDTO } from './drugs.dto';
-import { sanitizeUserId } from './drugs.sanitize';
+import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
+import { sanitizeString, sanitizeUserId } from './drugs.sanitize';
 import { logsGenerator } from '../accounts/accounts.logs';
 
 
@@ -104,9 +104,19 @@ export class drugServices {
     }
   }
 
-  async readDrug(userData: any) {
+  async readDrug(userData: any, readDTO: readDTO) {
 
     try {
+
+      // sort by field
+      const validSortByFields = ['name', 'description'];
+      const sortBy = (readDTO.sortBy).toLowerCase();
+      const validatedSortBy = validSortByFields.includes(sortBy) ? sortBy : 'name';
+
+      // sort by order
+      const validSortorderFields = ['asc', 'desc'];
+      const sortOrder = (readDTO.sortOrder);
+      const validatedSortOrder = validSortorderFields.includes(sortOrder) ? sortOrder : 'name';
 
       const drugs = await this.DrugEntity.find({
         where: {
@@ -114,7 +124,7 @@ export class drugServices {
         },
 
         order: {
-          name: 'ASC',
+          [validatedSortBy]: validatedSortOrder,
         }
 
       });

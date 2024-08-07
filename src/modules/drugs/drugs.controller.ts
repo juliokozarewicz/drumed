@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, ValidationPipe, Put, Delete, UseGuards, Param, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, ValidationPipe, Put, Delete, UseGuards, Param, Req, Query } from '@nestjs/common';
 import { drugServices } from './drugs.service';
-import { createDTO, updateDTO, deleteDTO } from './drugs.dto';
+import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -36,10 +36,15 @@ export class drugController {
         summary: 'Get Medications',
         description: 'Retrieves a list of medications available in the system.'
     })
-    readDrug(@Req() req: any) {
+    @ApiQuery({ name: 'sortBy', required: false, description: 'Field to sort by (e.g., name)' })
+    @ApiQuery({ name: 'sortOrder', required: false, description: 'Sort order', enum: ['asc', 'desc'] })
+    readDrug(
+        @Req() req: any,
+        @Query() readDTO: readDTO
+    ) {
 
         const userData = req.user;
-        return this.drugServices.readDrug(userData);
+        return this.drugServices.readDrug(userData, readDTO);
 
     }
 

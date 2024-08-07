@@ -1,5 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsNotEmpty, IsBoolean, IsString, Length, IsEmail } from 'class-validator';
+import { IsUUID, IsNotEmpty, IsBoolean, IsString, Length, IsEmail, IsOptional, IsIn } from 'class-validator';
+
+
+
+export class readDTO {
+
+    @Length(1, 255)
+    @IsOptional()
+    @IsString()
+    sortBy: string;
+
+    @Length(1, 255)
+    @IsOptional()
+    @IsString()
+    sortOrder: string;
+
+}
 
 export class createDTO {
  
