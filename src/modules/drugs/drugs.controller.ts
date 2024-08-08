@@ -36,7 +36,7 @@ export class drugController {
         summary: 'Get Medications',
         description: 'Retrieves a list of medications available in the system.'
     })
-    @ApiQuery({ name: 'sortBy', required: false, description: 'Field to sort by (e.g., name)', enum: ['name', 'description'], })
+    @ApiQuery({ name: 'sortBy', required: false, description: 'Field to sort by (e.g., name)', enum: ['name', 'expirationDate', 'description'], })
     @ApiQuery({ name: 'sortOrder', required: false, description: 'Sort order', enum: ['asc', 'desc'] })
     @ApiQuery({ name: 'findByName', required: false, description: 'Find By Medication Name (e.g., Paracetamol)' })
     readDrug(
