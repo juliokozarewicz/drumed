@@ -37,13 +37,12 @@ export class UserService {
     ) {}
 
     // exception handling
-     // exception handling
-  private readonly knownExceptions = [
-    ConflictException,
-    BadRequestException,
-    UnauthorizedException,
-    NotFoundException,
-  ];
+    private readonly knownExceptions = [
+        ConflictException,
+        BadRequestException,
+        UnauthorizedException,
+        NotFoundException,
+    ];
     // ---------------------------------------------------------------------------------
 
     // insert new user
