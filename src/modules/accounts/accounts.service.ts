@@ -51,7 +51,7 @@ export class UserService {
         try {
 
             // get user data
-            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(userDto.email) } });
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(userDto.email.toLocaleLowerCase()) } });
 
             // existing email verification
             if (existingUser) {
@@ -65,13 +65,13 @@ export class UserService {
                     }
                 });
             }
-            
+
             // insert data user
             const newUser = new UserEntity();
             newUser.isActive = true;
             newUser.level = false;
             newUser.name = sanitizeNameString(userDto.name);
-            newUser.email = sanitizeEmail(userDto.email);
+            newUser.email = sanitizeEmail(userDto.email.toLocaleLowerCase());
             newUser.isEmailConfirmed = false;
             newUser.password = await this.hashPassword(userDto.password);
 
@@ -139,7 +139,7 @@ export class UserService {
         try {
 
             // get user data
-            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(resendActivateDTO.email) } });
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(resendActivateDTO.email.toLocaleLowerCase()) } });
 
             // account not activated (deleted or banned)
             if (!existingUser.isActive) {
@@ -181,7 +181,7 @@ export class UserService {
             }
 
             // delete existing codes
-            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(resendActivateDTO.email) } } );
+            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(resendActivateDTO.email.toLocaleLowerCase()) } } );
 
             for (let i = 0; i < deleteAllCodes.length; i++) {
                 await this.userAccCodeActivate.remove(deleteAllCodes[i]);
@@ -238,19 +238,19 @@ export class UserService {
 
         try {
 
-            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(accActivateDTO.email), code: sanitizeString(accActivateDTO.code) }});
+            const CodeAccActivate = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(accActivateDTO.email.toLocaleLowerCase()), code: sanitizeString(accActivateDTO.code) }});
 
             if (CodeAccActivate) {
 
                 // delete all codes
-                const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(accActivateDTO.email) } } );
+                const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(accActivateDTO.email.toLocaleLowerCase()) } } );
 
                 for (let i = 0; i < deleteAllCodes.length; i++) {
                     await this.userAccCodeActivate.remove(deleteAllCodes[i]);
                 }
 
                 // Active account
-                const activeAccEnd = await this.userRepository.findOne( { where: { email: sanitizeEmail(accActivateDTO.email) } } );
+                const activeAccEnd = await this.userRepository.findOne( { where: { email: sanitizeEmail(accActivateDTO.email.toLocaleLowerCase()) } } );
 
                 // account not activated (deleted or banned)
                 if (!activeAccEnd.isActive) {
@@ -321,7 +321,7 @@ export class UserService {
         try {
 
             // get user data
-            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordLinkDTO.email) } });
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordLinkDTO.email.toLocaleLowerCase()) } });
             
             // existing email verification
             if (!existingUser) {
@@ -363,7 +363,7 @@ export class UserService {
             }
 
             // delete existing codes
-            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(changePasswordLinkDTO.email) } } );
+            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(changePasswordLinkDTO.email.toLocaleLowerCase()) } } );
 
             for (let i = 0; i < deleteAllCodes.length; i++) {
                 await this.userAccCodeActivate.remove(deleteAllCodes[i]);
@@ -422,8 +422,8 @@ export class UserService {
         try {
 
             // get user data
-            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email) } });
-            const CodeAccChange = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email), code: sanitizeString(changePasswordDTO.code) }});
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email.toLocaleLowerCase()) } });
+            const CodeAccChange = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(changePasswordDTO.email.toLocaleLowerCase()), code: sanitizeString(changePasswordDTO.code) }});
 
             // existing email verification
             if (!existingUser) {
@@ -467,7 +467,7 @@ export class UserService {
             if (CodeAccChange) {
                 await this.userRepository.manager.transaction(async transactionalEntityManager => {
                     // delete all codes
-                    const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(changePasswordDTO.email) } } );
+                    const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(changePasswordDTO.email.toLocaleLowerCase()) } } );
 
                     for (let i = 0; i < deleteAllCodes.length; i++) {
                         await this.userAccCodeActivate.remove(deleteAllCodes[i]);
@@ -533,7 +533,7 @@ export class UserService {
         try {
 
             // get user data
-            const user = await this.userRepository.findOne({ where: { email: sanitizeEmail(loginCredentials.email) } });
+            const user = await this.userRepository.findOne({ where: { email: sanitizeEmail(loginCredentials.email.toLocaleLowerCase()) } });
 
             // verify credentials
             if (!user || !await bcrypt.compare(loginCredentials.password, user.password)) {
@@ -575,7 +575,7 @@ export class UserService {
             }
 
             // token generator
-            const payload = { email: sanitizeEmail(loginCredentials.email), sub: user.id };
+            const payload = { email: sanitizeEmail(loginCredentials.email.toLocaleLowerCase()), sub: user.id };
             const jwtToken = {
                 "acessToken": this.jwtService.sign(payload)
             };
@@ -707,7 +707,7 @@ export class UserService {
         try {
 
             // get user data
-            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(deletAccountLinkDTO.email) } });
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(deletAccountLinkDTO.email.toLocaleLowerCase()) } });
             
             // existing email verification
             if (!existingUser) {
@@ -749,7 +749,7 @@ export class UserService {
             }
 
             // delete existing codes
-            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(deletAccountLinkDTO.email) } } );
+            const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(deletAccountLinkDTO.email.toLocaleLowerCase()) } } );
 
             for (let i = 0; i < deleteAllCodes.length; i++) {
                 await this.userAccCodeActivate.remove(deleteAllCodes[i]);
@@ -808,8 +808,8 @@ export class UserService {
         try {
 
             // get user data
-            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(deletAccountDTO.email) } });
-            const CodeAccDelete = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(deletAccountDTO.email), code: sanitizeString(deletAccountDTO.code) }});
+            const existingUser = await this.userRepository.findOne({ where: { email: sanitizeEmail(deletAccountDTO.email.toLocaleLowerCase()) } });
+            const CodeAccDelete = await this.userAccCodeActivate.findOne({ where: { email: sanitizeEmail(deletAccountDTO.email.toLocaleLowerCase()), code: sanitizeString(deletAccountDTO.code) }});
             const validPassword = await bcrypt.compare(deletAccountDTO.password, existingUser.password);
 
             // verify credentials
@@ -857,7 +857,7 @@ export class UserService {
             if (CodeAccDelete) {
                 await this.userRepository.manager.transaction(async transactionalEntityManager => {
                     // delete all codes
-                    const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(deletAccountDTO.email) } } );
+                    const deleteAllCodes = await this.userAccCodeActivate.find( { where: { email: sanitizeEmail(deletAccountDTO.email.toLocaleLowerCase()) } } );
 
                     for (let i = 0; i < deleteAllCodes.length; i++) {
                         await this.userAccCodeActivate.remove(deleteAllCodes[i]);
