@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsNotEmpty, IsBoolean, IsString, Length, IsEmail, IsOptional, IsIn } from 'class-validator';
+import { IsUUID, IsNotEmpty, IsBoolean, IsString, Length, IsEmail, IsOptional, IsIn, Matches } from 'class-validator';
 
 
 
@@ -14,6 +14,11 @@ export class readDTO {
     @IsOptional()
     @IsString()
     sortOrder: string;
+
+    @Length(1, 255)
+    @IsOptional()
+    @IsString()
+    findByName: string;
 
 }
 

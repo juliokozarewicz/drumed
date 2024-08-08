@@ -4,7 +4,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DrugEntity } from './drugs.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
 import { sanitizeString, sanitizeUserId } from './drugs.sanitize';
 import { logsGenerator } from '../accounts/accounts.logs';
@@ -109,18 +109,25 @@ export class drugServices {
     try {
 
       // sort by field
-      const validSortByFields = ['name', 'description'];
-      const sortBy = (readDTO.sortBy).toLowerCase();
+      const validSortByFields = ['expirationDate', 'name', 'description'];
+      const sortBy = (readDTO.sortBy);
       const validatedSortBy = validSortByFields.includes(sortBy) ? sortBy : 'name';
 
       // sort by order
       const validSortorderFields = ['asc', 'desc'];
       const sortOrder = (readDTO.sortOrder);
-      const validatedSortOrder = validSortorderFields.includes(sortOrder) ? sortOrder : 'name';
+      const validatedSortOrder = validSortorderFields.includes(sortOrder) ? sortOrder : 'asc';
 
+      // find by name
+      const findByName = readDTO.findByName;
+      const findByNameCond = findByName ? findByName : '';
+      const validatedfindByName = Like(`%${findByNameCond}%`)
+      
       const drugs = await this.DrugEntity.find({
+
         where: {
-          userIdInsert: sanitizeUserId(userData.userId)
+          userIdInsert: sanitizeUserId(userData.userId),
+          name: validatedfindByName
         },
 
         order: {
@@ -174,19 +181,6 @@ export class drugServices {
 
     try {
 
-      const id = updateDTO.id;
-      const name = updateDTO.name;
-      const barcode = updateDTO.barcode;
-      const description = updateDTO.description;
-      const laboratory = updateDTO.laboratory;
-      const unitOfMeasurement = updateDTO.unitOfMeasurement;
-      const purchasePrice = updateDTO.purchasePrice;
-      const sellingPrice = updateDTO.sellingPrice;
-      const expirationDate = updateDTO.expirationDate;
-      const category = updateDTO.category;
-      const batch = updateDTO.batch;
-      const restricted = updateDTO.restricted;
-
       // search in DB
       const drugUpdate = await this.DrugEntity.findOne({
         where: {
@@ -197,18 +191,18 @@ export class drugServices {
 
       if (drugUpdate) {
 
-        drugUpdate.id = id;
-        drugUpdate.name = name;
-        drugUpdate.barcode = barcode;
-        drugUpdate.description = description;
-        drugUpdate.laboratory = laboratory;
-        drugUpdate.unitOfMeasurement = unitOfMeasurement;
-        drugUpdate.purchasePrice = purchasePrice;
-        drugUpdate.sellingPrice = sellingPrice;
-        drugUpdate.expirationDate = expirationDate;
-        drugUpdate.category = category;
-        drugUpdate.batch = batch;
-        drugUpdate.restricted = restricted;
+        drugUpdate.id = updateDTO.id;
+        drugUpdate.name = updateDTO.name;
+        drugUpdate.barcode = updateDTO.barcode;
+        drugUpdate.description = updateDTO.description;
+        drugUpdate.laboratory = updateDTO.laboratory;
+        drugUpdate.unitOfMeasurement = updateDTO.unitOfMeasurement;
+        drugUpdate.purchasePrice = updateDTO.purchasePrice;
+        drugUpdate.sellingPrice = updateDTO.sellingPrice;
+        drugUpdate.expirationDate = updateDTO.expirationDate;
+        drugUpdate.category = updateDTO.category;
+        drugUpdate.batch = updateDTO.batch;
+        drugUpdate.restricted = updateDTO.restricted;
 
         await this.DrugEntity.save(drugUpdate);
 

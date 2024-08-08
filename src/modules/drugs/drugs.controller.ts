@@ -38,6 +38,7 @@ export class drugController {
     })
     @ApiQuery({ name: 'sortBy', required: false, description: 'Field to sort by (e.g., name)', enum: ['name', 'description'], })
     @ApiQuery({ name: 'sortOrder', required: false, description: 'Sort order', enum: ['asc', 'desc'] })
+    @ApiQuery({ name: 'findByName', required: false, description: 'Find By Medication Name (e.g., Paracetamol)' })
     readDrug(
         @Req() req: any,
         @Query() readDTO: readDTO
