@@ -1,6 +1,7 @@
 import {
     Controller, Get, Post, Body, ValidationPipe, ParseUUIDPipe,
-    Put, Delete, UseGuards, Param, Req, Query
+    Put, Delete, UseGuards, Param, Req, Query,
+    Patch
 } from '@nestjs/common';
 import { drugServices } from './drugs.service';
 import { createDTO, readDTO, updateDTO } from './drugs.dto';
@@ -55,7 +56,7 @@ export class drugController {
 
     }
 
-    @Put('update/:updateID')
+    @Patch('update/:updateID')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
     @ApiParam({ name: 'updateID', required: true, description: 'Unique identifier for the resource to be updated.' })
