@@ -3,7 +3,7 @@ import {
     Put, Delete, UseGuards, Param, Req, Query
 } from '@nestjs/common';
 import { drugServices } from './drugs.service';
-import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
+import { createDTO, readDTO, updateDTO } from './drugs.dto';
 import {
     ApiBearerAuth, ApiBody, ApiOperation,
     ApiQuery, ApiTags, ApiParam
@@ -75,21 +75,21 @@ export class drugController {
 
     }
 
-    @Delete('delete')
+    @Delete('delete/:deleteID')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    @ApiBody({ type: deleteDTO})
+    @ApiParam({ name: 'deleteID', required: true, description: 'Unique identifier for the resource to be deleted.' })
     @ApiOperation({
         summary: 'Delete Medication',
         description: 'Allows the user to delete an existing medication by providing the medication ID.'
       })
     deleteDrug(
         @Req() req: any,
-        @Body(new ValidationPipe({ transform: true })) deleteDTO: deleteDTO
+        @Param('deleteID', new ParseUUIDPipe()) deleteID: string
     ) {
 
         const userData = req.user;
-        return this.drugServices.deleteDrug(userData, deleteDTO);
+        return this.drugServices.deleteDrug(userData, deleteID);
 
     }
 

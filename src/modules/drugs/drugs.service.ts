@@ -5,8 +5,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DrugEntity } from './drugs.entity';
 import { Like, Repository } from 'typeorm';
-import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
-import { sanitizeString, sanitizeUserId } from './drugs.sanitize';
+import { createDTO, readDTO, updateDTO } from './drugs.dto';
+import { sanitizeUserId } from './drugs.sanitize';
 import { logsGenerator } from '../accounts/accounts.logs';
 
 
@@ -261,21 +261,21 @@ export class drugServices {
     }
   }
 
-  async deleteDrug(userData: any, deleteDTO: deleteDTO) {
+  async deleteDrug(userData: any, deleteID: string) {
 
     try {
   
       // search in DB
       const drugDelete = await this.DrugEntity.findOne({
         where: {
-          id: sanitizeUserId(deleteDTO.id),
+          id: sanitizeUserId(deleteID),
           userIdInsert: sanitizeUserId(userData.userId)
         }
       });
 
       if (drugDelete) {
 
-        await this.DrugEntity.delete(deleteDTO.id);
+        await this.DrugEntity.delete(deleteID);
 
         return {
           statusCode: 204,
