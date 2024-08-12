@@ -5,7 +5,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DrugEntity } from './drugs.entity';
 import { Like, Repository } from 'typeorm';
-import { createDTO, readDTO, updateDTO, deleteDTO, idDTO } from './drugs.dto';
+import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
 import { sanitizeString, sanitizeUserId } from './drugs.sanitize';
 import { logsGenerator } from '../accounts/accounts.logs';
 

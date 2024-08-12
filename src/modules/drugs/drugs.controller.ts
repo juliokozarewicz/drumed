@@ -3,7 +3,7 @@ import {
     Put, Delete, UseGuards, Param, Req, Query
 } from '@nestjs/common';
 import { drugServices } from './drugs.service';
-import { createDTO, readDTO, updateDTO, deleteDTO, idDTO } from './drugs.dto';
+import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
 import {
     ApiBearerAuth, ApiBody, ApiOperation,
     ApiQuery, ApiTags, ApiParam
