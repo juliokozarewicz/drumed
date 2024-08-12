@@ -181,8 +181,6 @@ export class drugServices {
 
     try {
 
-      console.log(updateID)
-
       // search in DB
       const drugUpdate = await this.DrugEntity.findOne({
         where: {
