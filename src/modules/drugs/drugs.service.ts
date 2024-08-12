@@ -5,7 +5,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DrugEntity } from './drugs.entity';
 import { Like, Repository } from 'typeorm';
-import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
+import { createDTO, readDTO, updateDTO, deleteDTO, idDTO } from './drugs.dto';
 import { sanitizeString, sanitizeUserId } from './drugs.sanitize';
 import { logsGenerator } from '../accounts/accounts.logs';
 
@@ -177,21 +177,21 @@ export class drugServices {
     }
   }
 
-  async updateDrug(userData: any, updateDTO: updateDTO) {
+  async updateDrug(userData: any, updateDTO: updateDTO, updateID: idDTO) {
 
     try {
 
       // search in DB
       const drugUpdate = await this.DrugEntity.findOne({
         where: {
-          id: sanitizeUserId(updateDTO.id),
+          id: sanitizeUserId(updateID.dataId),
           userIdInsert: sanitizeUserId(userData.userId)
         }
       });
 
       if (drugUpdate) {
 
-        drugUpdate.id = updateDTO.id;
+        drugUpdate.id = updateID.dataId;
         drugUpdate.name = updateDTO.name;
         drugUpdate.barcode = updateDTO.barcode;
         drugUpdate.description = updateDTO.description;

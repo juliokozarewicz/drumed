@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, ValidationPipe, Put, Delete, UseGuards, Param, Req, Query } from '@nestjs/common';
 import { drugServices } from './drugs.service';
-import { createDTO, readDTO, updateDTO, deleteDTO } from './drugs.dto';
+import { createDTO, readDTO, updateDTO, deleteDTO, idDTO } from './drugs.dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -36,7 +36,7 @@ export class drugController {
         summary: 'Get Medications',
         description: 'Retrieves a list of medications available in the system.'
     })
-    @ApiQuery({ name: 'sortBy', required: false, description: 'Field to sort by (e.g., name)', enum: ['name', 'expirationDate', 'description'], })
+    @ApiQuery({ name: 'sortBy', required: false, description: 'Field to sort by (e.g., name).', enum: ['name', 'expirationDate', 'description'], })
     @ApiQuery({ name: 'sortOrder', required: false, description: 'Sort order', enum: ['asc', 'desc'] })
     @ApiQuery({ name: 'findByName', required: false, description: 'Find By Medication Name (e.g., Paracetamol)' })
     readDrug(
@@ -52,6 +52,7 @@ export class drugController {
     @Put('update')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
+    @ApiQuery({ name: 'dataId', required: true, description: 'Unique identifier for the resource to be updated.' })
     @ApiBody({ type: updateDTO})
     @ApiOperation({
         summary: 'Update Medication',
@@ -59,11 +60,12 @@ export class drugController {
     })
     updateDrug(
         @Req() req: any,
+        @Query(new ValidationPipe({ transform: true })) updateID: idDTO,
         @Body(new ValidationPipe({ transform: true })) updateDTO: updateDTO
     ) {
 
         const userData = req.user;
-        return this.drugServices.updateDrug(userData, updateDTO);
+        return this.drugServices.updateDrug(userData, updateDTO, updateID);
 
     }
 
