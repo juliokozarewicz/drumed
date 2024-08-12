@@ -1,7 +1,13 @@
-import { Controller, Get, Post, Body, ValidationPipe, Put, Delete, UseGuards, Param, Req, Query } from '@nestjs/common';
+import {
+    Controller, Get, Post, Body, ValidationPipe, ParseUUIDPipe,
+    Put, Delete, UseGuards, Param, Req, Query
+} from '@nestjs/common';
 import { drugServices } from './drugs.service';
 import { createDTO, readDTO, updateDTO, deleteDTO, idDTO } from './drugs.dto';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+    ApiBearerAuth, ApiBody, ApiOperation,
+    ApiQuery, ApiTags, ApiParam
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 
@@ -49,10 +55,10 @@ export class drugController {
 
     }
 
-    @Put('update')
+    @Put('update/:updateID')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    @ApiQuery({ name: 'dataId', required: true, description: 'Unique identifier for the resource to be updated.' })
+    @ApiParam({ name: 'updateID', required: true, description: 'Unique identifier for the resource to be updated.' })
     @ApiBody({ type: updateDTO})
     @ApiOperation({
         summary: 'Update Medication',
@@ -60,7 +66,7 @@ export class drugController {
     })
     updateDrug(
         @Req() req: any,
-        @Query(new ValidationPipe({ transform: true })) updateID: idDTO,
+        @Param('updateID', new ParseUUIDPipe()) updateID: string,
         @Body(new ValidationPipe({ transform: true })) updateDTO: updateDTO
     ) {
 

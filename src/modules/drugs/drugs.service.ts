@@ -177,21 +177,23 @@ export class drugServices {
     }
   }
 
-  async updateDrug(userData: any, updateDTO: updateDTO, updateID: idDTO) {
+  async updateDrug(userData: any, updateDTO: updateDTO, updateID: string) {
 
     try {
+
+      console.log(updateID)
 
       // search in DB
       const drugUpdate = await this.DrugEntity.findOne({
         where: {
-          id: sanitizeUserId(updateID.dataId),
+          id: sanitizeUserId(updateID),
           userIdInsert: sanitizeUserId(userData.userId)
         }
       });
 
       if (drugUpdate) {
 
-        drugUpdate.id = updateID.dataId;
+        drugUpdate.id = updateID;
         drugUpdate.name = updateDTO.name;
         drugUpdate.barcode = updateDTO.barcode;
         drugUpdate.description = updateDTO.description;

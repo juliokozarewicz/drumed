@@ -123,7 +123,6 @@ export class createDTO {
         example: 'b5a6c7fd-8d0e-45a7-9b17-fd5fd7f5c822', 
     })
     @IsNotEmpty()
-    @IsString()
     @IsUUID()
     dataId: string;
 
